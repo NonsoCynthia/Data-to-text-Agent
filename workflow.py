@@ -12,7 +12,7 @@ from aggregator import ResponseAggregator
 from agent_prompts import content_ordering, text_structuring, surface_realization
 
 
-workers = {
+workers_dict = {
     "content ordering": content_ordering,
     "text structuring": text_structuring,
     "surface realization": surface_realization,
@@ -51,7 +51,7 @@ def add_workers(
         worker_names.append(name)
     return worker_names
 
-workers_list = [key for key, value in workers.items()]
+workers_list = [key for key, value in workers_dict.items()]
 
 # ——— Build your StateGraph ———
 agent_workflow = StateGraph(StageExecute)
@@ -70,7 +70,7 @@ agent_workflow.add_node(
 #    `initial_query` is whatever you're passing in as the user input.
 tools = []
 initial_query = StageExecute["input"]  # or whatever your entry payload is
-worker_names = add_workers(workers, agent_workflow, tools, initial_query)
+worker_names = add_workers(workers_dict, agent_workflow, tools, initial_query)
 agent_workflow.add_node("inspector", Inspector.run_model(Inspector.create_model()))
 agent_workflow.add_node("aggregator", ResponseAggregator.run_model(ResponseAggregator.create_model()))
 

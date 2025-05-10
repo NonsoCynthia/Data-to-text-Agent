@@ -48,7 +48,8 @@ class Orchestrator:
 
             result_steps_str = prepare_result_steps(result_steps)
             if result_steps_str:
-                inp = f"{'\n\n'.join(result_steps_str)}\n\n{inp}"
+                joined = "\n\n".join(result_steps_str)
+                inp = f"{joined}\n\n{inp}"
 
             if plan:
                 plan_str = "\n".join(
