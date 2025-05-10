@@ -1,5 +1,7 @@
 from langgraph.graph import START, END, StateGraph
 from utils import StageExecute, Agent, AgentExecuteInput
+from langgraph.graph import START, END, StateGraph
+from utils import StageExecute, Agent, AgentExecuteInput
 from IPython.display import Image, display
 from typing import List, Literal, Optional, Text, Union, Dict, Any
 from planner import Planner
@@ -7,7 +9,7 @@ from orchestrator import Orchestrator
 from worker import Worker
 from inspector import Inspector
 from aggregator import ResponseAggregator
-from workers_dict import content_ordering, text_structuring, surface_realization
+from agent_prompts import content_ordering, text_structuring, surface_realization
 
 
 workers = {
@@ -16,14 +18,9 @@ workers = {
     "surface realization": surface_realization,
 }
 
-# def transition_after_inspection(state: StageExecute) -> Literal["orchestrator", "aggregator"]:
-#     """Decides the next stage after inspection based on task correctness."""
-#     if state.get("response") in ["done", "incomplete"]:
-#         return "aggregator"
-#     return "orchestrator"
-
 def transition_after_inspection(state: StageExecute) -> Literal["orchestrator", "aggregator"]:
-    if state["current_step"] >= len(state["plan"]):
+    """Decides the next stage after inspection based on task correctness."""
+    if state.get("response") in ["done", "incomplete"]:
         return "aggregator"
     return "orchestrator"
 
@@ -109,12 +106,15 @@ process_flow = agent_workflow.compile()
 
 # display(Image(process_flow.get_graph(xray=True).draw_mermaid_png()))
 
+
 # === Test it out ===
-data = """<page_title> 2009 NASCAR Camping World Truck Series </page_title> <section_title> Schedule </section_title> <table> <cell> August 1 <col_header> Date </col_header> </cell> <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell> </table>"""
+data = """<page_title> Kieran Bew </page_title> <section_title> Television </section_title> <table> <cell> Hans Christian Andersen: My Life as a Fairytale <col_header> Show </col_header> </cell> <cell> Hallmark Entertainment <col_header> Notes </col_header> </cell> <cell> The Street <col_header> Year </col_header> </cell> <cell> Gary Parr <col_header> Show </col_header> </cell> <cell> Da Vinci's Demons <col_header> Show </col_header> </cell> <cell> Duke Alphonso of Calabria <col_header> Role </col_header> </cell> </table>"""
+
+ground_truth = "Kieran Bew appeared in Da Vinci's Demons as Duke of Calabria, as Gary Parr in The Street and in Hans Christian Andersen: My Life as a Fairytale for Hallmark Entertainment."
 
 query = f"""You are an agent designed to generate text from data for a data-to-text natural language generation. You can be provided data in the form of xml, table, meaning representations, graphs etc. 
 Your task is to generate the appropriate text given the data information without omitting any field or adding extra information in essence called hallucination.
-Here is the data:
+Here is the data generate text using table data:
 {data}"""
 
 initial_state = {
@@ -132,3 +132,5 @@ initial_state = {
 
 state = process_flow.invoke(initial_state, config={"recursion_limit": initial_state["recursion_limit"]})
 print(state)
+print("*"*50)
+print(state['response'])

@@ -1,7 +1,7 @@
 from langchain.agents import AgentExecutor
 from utils import StageExecute, ResultStep
 from llm_model import OllamaModel
-from agent_prompts import AGGREGATOR_PROMPT
+from agent_prompts import AGGREGATOR_PROMPT, AGGREGATOR_INPUT
 from orchestrator import prepare_result_steps
 
 
@@ -10,7 +10,7 @@ class ResponseAggregator:
     @classmethod
     def create_model(cls) -> AgentExecutor:
         generator = OllamaModel()
-        aggregator = generator.model_("Generate a response to the provided objective as you are responding to the user who asked for. If any step could not be solved, tell you did not have the tools to solve it.")
+        aggregator = generator.model_(AGGREGATOR_PROMPT)
         return aggregator
     
     @classmethod
@@ -26,7 +26,7 @@ class ResponseAggregator:
             
             plan = state["plan"]
             plan_str = "\n".join(f"Step {i+1}: Worker '{step['worker']}' - '{step['step']}'" for i, step in enumerate(plan) if "worker" in step and "step" in step)
-            input_ = AGGREGATOR_PROMPT.format(
+            input_ = AGGREGATOR_INPUT.format(
                 input=agent_input,
                 result_steps=result_steps_str,
                 plan=plan_str,

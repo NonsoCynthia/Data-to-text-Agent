@@ -17,6 +17,7 @@
 
 # Format your workflow as follows:
 
+
 # Thought: Describe reasoning behind workflow structure and stage dependencies.
 # Plan:
 # ```json
@@ -106,21 +107,29 @@ Input: {input}
 Planning_results: {result_steps} 
 Planning_steps: {plan}"""
 
-
 AGGREGATOR_PROMPT = """You are the final agent responsible for generating the final output text based on the results of the data-to-text pipeline.
 
 *** Your Role ***
-- Compile the final natural language output based on the latest response from the 'surface realization' stage.
-- Ensure the generated text includes all relevant information selected and structured in the earlier steps.
-- Do not replan or re-evaluate; focus solely on delivering the final output.
+- Extract and return the final natural language text strictly from the 'surface realization' stage.
+- Do not generate, rephrase, or embellish any part of the content.
+- Ensure the output reflects the final prediction as close as possible to the ground truth.
+
+*** Instructions ***
+- Only return the surface realization output if it is factually accurate and complete.
+- The output should match the style, phrasing, and informational structure of the ground truth.
+- Do not invent details, add stylistic wrappers, or include filler commentary.
+- If the surface realization result is missing, incomplete, or incorrect, report exactly what is missing.
+
+*** Output Format ***
+Final Answer: [One fluent, compact sentence that accurately reflects the structured data without deviation]
+"""
+
+AGGREGATOR_INPUT = """Generate a response to the provided objective as if you are responding to the original user.
 
 *** Input Context ***
 Objective: {input}
 Plan: {plan}
 Completed Steps: {result_steps}
-
-*** Instructions ***
-Generate the final text as if delivering it to the user. If the final surface realization output is missing or invalid, state what is missing instead of generating new content.
 
 *** Output Format ***
 Final Answer: """
@@ -205,3 +214,76 @@ AGENT_HUMAN_PROMPT = """{input}
 
 {agent_scratchpad}
  (reminder to respond in a JSON blob no matter what)"""
+ 
+content_ordering = """Role:
+- The Content Ordering agent arranges input data into a logical sequence to facilitate coherent text generation.
+
+Responsibilities:
+- Identify a logical, natural, or informative sequence for presenting data.
+- Order content based on temporal (chronological), thematic, or narrative criteria.
+- Avoid repetition and awkward transitions between elements.
+
+Outcome:
+- A clearly ordered structure of data elements that informs subsequent text structuring and surface realization.
+
+Example:
+Table data (only the table data matter): <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
+<section_title> Schedule </section_title> 
+<table> 
+    <cell> August 1 <col_header> Date </col_header> </cell> 
+    <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> 
+    <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell> 
+</table>
+Outcome: <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
+<section_title> Schedule </section_title> 
+<table> 
+  <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> 
+  <cell> August 1 <col_header> Date </col_header> </cell> 
+  <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell> 
+</table>
+"""
+
+text_structuring = """Role:
+- The Text Structuring agent organizes ordered content into a structured textual framework suitable for natural language generation.
+
+Responsibilities:
+- Group ordered data into meaningful units.
+- Apply rhetorical and logical structures to enhance coherence and readability.
+- Clearly segment data at sentence or paragraph levels.
+
+Outcome:
+- A structured representation of content that guides the surface realization stage.
+
+Example:
+Table data (only the table data matter): <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
+<section_title> Schedule </section_title> 
+<table> 
+  <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> <cell> August 1 <col_header> Date </col_header> </cell> <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell> 
+</table>
+Outcome: <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
+<section_title> Schedule </section_title> 
+<table> 
+  <snt> <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> <cell> August 1 <col_header> Date </col_header> </cell> <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell></snt>
+</table>
+"""
+
+surface_realization = """Role:
+- The Surface Realization agent transforms structured content into fluent, grammatically correct natural language text.
+
+Responsibilities:
+- Select lexical and syntactic constructions for readability and appropriateness.
+- Integrate cohesive devices (e.g., discourse markers) for natural flow.
+- Produce stylistically coherent and human-readable output.
+
+Outcome:
+- Final natural language text suitable for immediate presentation.
+
+Example:
+Table data (only the table data matter): <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
+<section_title> Schedule </section_title> 
+<table> 
+  <snt> <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> <cell> August 1 <col_header> Date </col_header> </cell> <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell></snt>
+</table>
+Outcome: The Toyota Tundra 200 was held on August 1 at the Nashville Superspeedway.
+"""
+
