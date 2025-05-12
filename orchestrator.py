@@ -31,80 +31,68 @@ class Orchestrator:
     @classmethod
     def create_model(cls) -> AgentExecutor:
         generator = OllamaModel()
-        return generator.model_(ORCHESTRATOR_PROMPT)
+        orchestrator = generator.model_(ORCHESTRATOR_PROMPT)
+        return orchestrator
+
 
     @classmethod
     def run_model(cls, orchestrator: AgentExecutor, workers: List[Text]):
         def run(state: StageExecute):
-            result_steps = state.get("result_steps", [])
-            team_iterations = state.get("team_iterations", 0)
-            recursion_limit = state.get("recursion_limit", 50)
-            chat_history = state.get("chat_history", [])
-            plan = state.get("plan", [])
-            current_step = state.get("current_step", 0)
-
-            chat_str = "\n".join(f"{msg['role'].upper()}: {msg['content']}" for msg in chat_history).strip()
-            inp = "INPUT\n--------------------\n" + "\n".join([chat_str, f"USER: {state['input']}"])
+            result_steps = state["result_steps"] or []
+            team_iterations = state["team_iterations"] or 0
+            recursion_limit = state["recursion_limit"] or 50
+            chat_history = state["chat_history"] or []
+            chat_history = "\n".join(
+                [f"{chats['role'].upper()}: {chats['content']}" for chats in chat_history]
+            ).strip()
+            inp = "INPUT\n--------------------\n" + "\n".join([chat_history, f"USER: {state['input']}"])
 
             result_steps_str = prepare_result_steps(result_steps)
             if result_steps_str:
-                joined = "\n\n".join(result_steps_str)
-                inp = f"{joined}\n\n{inp}"
+                inp = f"{'\n\n'.join(result_steps_str)}\n\n{inp}"
 
-            if plan:
+            if state["plan"] is not None:
+                plan = state["plan"]
                 plan_str = "\n".join(
-                    f"Step {i+1}: Worker '{step['worker']}' - '{step['step']}'"
-                    for i, step in enumerate(plan)
+                    f"Step {i+1}: Worker '{step['worker']}' - '{step['step']}'" for i, step in enumerate(plan)
                 )
-                inp = f"INITIAL PLAN:\n{plan_str}\n--------------------\n\n{inp}"
+                inp = f"INITIAL PLAN:\n{plan_str}\n--------------------\n\n" + inp
 
-            if plan and current_step < len(plan):
-                current_task = plan[current_step]
-                next_worker = current_task["worker"]
-                next_input = current_task["step"]
-                thought = f"Proceeding to step {current_step + 1}: {next_worker} - {next_input}"
-            elif current_step >= len(plan):
-                next_worker = "FINISH"
-                next_input = "All steps in the plan have been completed."
-                thought = "All tasks complete."
-            elif not plan and team_iterations >= recursion_limit:
-                next_worker = "FINISH"
-                next_input = "I couldn't provide an answer because the maximum number of iterations was reached."
-                thought = "Recursion limit reached."
+            if (
+                state["plan"] is not None
+                and any(step["worker"] != "NOT_SOLVABLE" for step in state["plan"])
+                or (state["plan"] is None and team_iterations < recursion_limit)
+            ):
+                agent_response = orchestrator.invoke({"input": inp}).content
+                try:
+                    thought, next, next_input = re.findall(
+                        r"Thought:\s*(.*?)\s*Worker:\s*(.*?)\s*Worker Input:\s*(.*)", agent_response, re.DOTALL
+                    )[0]
+                except Exception:
+                    thought, next, next_input = "", agent_response, agent_response
+            elif state["plan"] is None and team_iterations >= recursion_limit:
+                thought, next, next_input = "", "FINISH", "Recursion limit reached."
             else:
-                next_worker = "FINISH"
-                next_input = "The assigned task can not be solved by the team."
-                thought = "No solvable plan found."
+                thought, next, next_input = "", "FINISH", "The assigned task cannot be solved by the team."
 
+            next = next.replace(" tools", "").strip()
             result_steps.append(
                 ResultStep(
                     input=inp,
-                    output=f"{next_worker}(input='{next_input}')",
+                    output=f"{next}(input='{next_input}')",
                     agent="orchestrator",
                     thought=thought,
                 )
             )
-
-            if next_worker in workers:
-                return {
-                    "next": next_worker,
-                    "next_input": next_input,
-                    "plan": plan,
-                    "current_step": current_step,
-                    "result_steps": result_steps,
-                    "team_iterations": team_iterations + 1,
-                    "recursion_limit": recursion_limit,
-                }
+            if next in workers:
+                return {"next": next, "next_input": next_input}
             else:
                 return {
-                    "next": "inspector" if plan else "FINISH",
+                    "next": "inspector" if state["plan"] is not None else "FINISH",
                     "next_input": next_input,
                     "response": next_input,
-                    "plan": plan,
-                    "current_step": current_step,
                     "result_steps": result_steps,
                     "team_iterations": team_iterations + 1,
                     "recursion_limit": recursion_limit,
                 }
-
         return run

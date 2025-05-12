@@ -9,10 +9,6 @@ from langgraph.errors import GraphRecursionError
 
 
 def validate_input_variables(template: Text, input_variables: Union[Text, Dict[Text, Text]]) -> Text:
-    """
-    Replaces variables within the template using values from input_variables.
-    If input_variables is a string, the template is returned unchanged.
-    """
     variables = re.findall(r"(?<!{){([^}]+)}(?!})", template)
     if isinstance(input_variables, str):
         return template
@@ -22,11 +18,6 @@ def validate_input_variables(template: Text, input_variables: Union[Text, Dict[T
 
 
 def prepare_tool_intermediate_steps(result_steps: list) -> List[Text]:
-    """
-    Constructs a list of ToolIntermediateStep objects from the given intermediate steps.
-    Each intermediate step is expected to be a tuple containing a step (with attributes
-    'tool' and 'tool_input') and its corresponding output.
-    """
     try:
         tool_intermediate_steps = []
         for step, step_output in result_steps:
@@ -45,12 +36,12 @@ def prepare_tool_intermediate_steps(result_steps: list) -> List[Text]:
 class Worker:
     @classmethod
     def create_model(cls, agent_description: Text, tools: List[Any], query: Union[Text, Dict[str, Any]]) -> AgentExecutor:
-        llm = OllamaModel().raw_model()     
+        llm = OllamaModel().raw_model()
         sys_message = AGENT_SYSTEM_PROMPT
         if agent_description:
             agent_description = validate_input_variables(template=agent_description, input_variables=query)
             sys_message = f"AGENT DESCRIPTION:\n{agent_description}\n\nPROMPT:\n{AGENT_SYSTEM_PROMPT}"
-        
+
         prompt = ChatPromptTemplate(
             [
                 ("system", sys_message),
@@ -69,7 +60,7 @@ class Worker:
             return_intermediate_steps=True,
         )
         return agent_executor
-    
+
     @classmethod
     def run_model(cls, worker: AgentExecutor, task_name: str):
         def run(state: StageExecute):
@@ -78,29 +69,17 @@ class Worker:
             agent_input = state["next_input"]
 
             try:
-                agent_response = worker.invoke({
-                    'input': agent_input,
-                    'output_format': 'text'
-                }, handle_parsing_errors=True)
+                result = worker.invoke({"input": agent_input}, handle_parsing_errors=True)
+                if isinstance(result, dict):
+                    response_text = result.get("output") or result.get("input") or str(result)
+                else:
+                    response_text = str(result)
 
-                response_text = (
-                    agent_response.get("output")
-                    or agent_response.get("action_input")
-                    or agent_response.get("input")
-                    or str(agent_response)
-                )
-
-                # Determine if Final Answer was returned
-                done = "final answer" in response_text.lower()
-
-                tool_intermediate_steps = prepare_tool_intermediate_steps(
-                    result_steps=agent_response.get("intermediate_steps", [])
-                )
+                tool_intermediate_steps = prepare_tool_intermediate_steps(result.get("intermediate_steps", []))
 
             except GraphRecursionError:
                 response_text = "The agent reached the maximum number of iterations and could not solve the problem. Split the problem into multiple tasks."
                 tool_intermediate_steps = []
-                done = True  # Stop retrying
 
             result_steps.append(
                 ResultStep(
@@ -112,13 +91,9 @@ class Worker:
                 )
             )
 
-            next_node = "inspector" if done else task_name
-
             return {
                 "result_steps": result_steps,
-                "team_iterations": team_iterations + 1,
-                "next": next_node,
-                "next_input": response_text
+                "team_iterations": team_iterations + 1
             }
 
         return run

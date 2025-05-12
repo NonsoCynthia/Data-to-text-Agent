@@ -17,18 +17,31 @@ class ResultStep(BaseModel):
     output: Union[List, Dict, Text]
     thought: Optional[Union[List, Dict, Text]] = None
     
-class StageExecute(TypedDict):
+class StageExecute(TypedDict, total=False):  # set total=False to make all keys optional
     input: Union[Text, Dict[str, Any]]
     plan: List[Dict[str, Any]]
-    result_steps: List[ResultStep] = []
-    chat_history: List[Dict[str, Any]] = []
+    result_steps: List[ResultStep]
+    chat_history: List[Dict[str, Any]]
     next: str
     next_input: str
     response: str
     agent_outcome: str
-    team_iterations: int = 0
-    recursion_limit: int = 100
+    team_iterations: int
+    recursion_limit: int
     current_step: int
+    
+# class StageExecute(TypedDict):
+#     input: Union[Text, Dict[str, Any]]
+#     plan: List[Dict[str, Any]]
+#     result_steps: List[ResultStep] = []
+#     chat_history: List[Dict[str, Any]] = []
+#     next: str
+#     next_input: str
+#     response: str
+#     agent_outcome: str
+#     team_iterations: int = 0
+#     recursion_limit: int = 100
+#     current_step: int
     
 class Role(str, Enum):
     USER = "user"

@@ -52,13 +52,15 @@ Plan:
 # - 'text structuring'
 # - 'surface realization'
 
-ORCHESTRATOR_PROMPT = """You are the orchestrator agent responsible for coordinating the execution of a multi-stage data-to-text task involving:
+ORCHESTRATOR_PROMPT = """You are the orchestrator agent responsible for coordinating the execution of a multi-stage data-to-text task involving the following workers:
 
-No other agents or tools are allowed in the orchestration process except the ones provided in the plan.
+- 'content ordering'
+- 'text structuring'
+- 'surface realization'
 
 *** Responsibilities ***
 - Decide which worker should act next based on completed steps and current user input.
-- Terminate the workflow with 'FINISH' if the task is done or inputs are insufficient.
+- You MUST return only one of the three valid worker names listed above, or 'FINISH' if the task is done.
 
 *** Output Format ***
 Thought: Justify your decision considering the user's request and current progress.
