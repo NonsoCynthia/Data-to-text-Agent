@@ -34,6 +34,8 @@ class Inspector:
                 )
                 result_steps_str = prepare_result_steps(result_steps)
                 result_steps_str = "\n\n".join(result_steps_str) if result_steps_str else "No result steps."
+                
+                print(f"RESULT STEPS: {result_steps_str}")
 
                 inspector_input = INSPECTOR_INPUT.format(
                     input=agent_input,
@@ -42,6 +44,7 @@ class Inspector:
                 )
 
                 agent_response = inspector.invoke({"input": inspector_input}).content
+                print(f"INSPECTOR: {agent_response}")
                 feedback = agent_response.lower().split('feedback:')[-1].strip()
 
                 if feedback == "correct":

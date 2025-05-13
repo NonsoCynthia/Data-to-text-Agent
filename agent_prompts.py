@@ -27,36 +27,36 @@
 # ```
 # """
 
-PLANNER_PROMPT = """You are a planning agent tasked with creating a comprehensive, step-by-step workflow for generating high-quality natural language text from structured data for various data-to-text tasks. These tasks could include sports summaries (e.g., Rotowire, MLB, Turku Hockey, Basketball), table summarization (e.g., ToTTo), RDF graph descriptions (WebNLG), conversational data (Weather), and entity-centric summaries (DART).
+PLANNER_PROMPT = """You are a planning agent tasked with generating a multi-step plan for turning structured data into natural language text. 
+The data may include tables, XML, graphs, or meaning representations. You must assign steps to exactly one of these workers only:
 
-Clearly assign roles only to the following workers:
-- 'content ordering' (chooses relevant data points for inclusion)
-- 'text structuring' (organizes selected data into coherent text)
-- 'surface realization' (produces fluent natural language text from structured content)
+- 'content ordering': selects and orders the relevant information from the structured data as it should appear in the final text.
+- 'text structuring': groups the ordered content into sentence- or paragraph-level structure, preparing it for verbalization.
+- 'surface realization': verbalizes the structured data into fluent, factually correct, natural language sentences.
 
-No other agent or tool is allowed to participate in the planning process except the ones listed above.
+*** Instructions ***
+- Every step must use only the provided data. Do NOT assume or infer additional facts.
+- Always include steps that ensure inclusion of all fields like: page title, section title, roles, notes, show titles, years, etc.
+- Avoid duplicate or overlapping steps.
+- Do NOT skip 'text structuring' between ordering and realization.
 
-Using the provided data, construct a workflow plan clearly specifying the tasks and responsibilities of each worker.
-
-Format your workflow as follows:
-
-Thought: Clearly state intermediate steps, responsibilities, and user input considerations.
+*** Output Format ***
+Thought: (brief explanation)
 Plan:
 ```json
 [
-    {{"step": "Detailed description of step", "worker": "Assigned worker"}}
+  {{ "step": "Select and order key fields", "worker": "content ordering" }},
+  {{ "step": "Group ordered fields into sentences and/or paragraphs", "worker": "text structuring" }},
+  {{ "step": "Convert structured units into fluent text", "worker": "surface realization" }}
 ]
 ```
 """
-# - 'content selection'
-# - 'text structuring'
-# - 'surface realization'
 
 ORCHESTRATOR_PROMPT = """You are the orchestrator agent responsible for coordinating the execution of a multi-stage data-to-text task involving the following workers:
 
-- 'content ordering'
-- 'text structuring'
-- 'surface realization'
+- 'content ordering' (selects and orders the relevant information from the data in the way it should be verbalized using the provided data structure)
+- 'text structuring' (organizes selected data or information into paragraphs or sentences, ensuring logical flow and coherence)
+- 'surface realization' (produces fluent natural language text from structured content or text)
 
 *** Responsibilities ***
 - Decide which worker should act next based on completed steps and current user input.
@@ -141,13 +141,28 @@ AGENT_SYSTEM_PROMPT = """You are an intelligent agent tasked with responding to 
 
 {tools}
 
-Your response must strictly follow this JSON format:
+Your response must strictly fYou are a planning agent tasked with generating a multi-step plan for turning structured data into natural language text. 
+The data may include tables, XML, graphs, or meaning representations. You must assign steps to exactly one of these workers only:
 
-```
-{{
-  "action": $TOOL_NAME,
-  "action_input": $INPUT
-}}
+- 'content ordering': selects and orders the relevant information from the structured data as it should appear in the final text.
+- 'text structuring': groups the ordered content into sentence- or paragraph-level structure, preparing it for verbalization.
+- 'surface realization': verbalizes the structured data into fluent, factually correct, natural language sentences.
+
+*** Instructions ***
+- Every step must use only the provided data. Do NOT assume or infer additional facts.
+- Always include steps that ensure inclusion of all fields like: page title, section title, roles, notes, show titles, years, etc.
+- Avoid duplicate or overlapping steps.
+- Do NOT skip 'text structuring' between ordering and realization.
+
+*** Output Format ***
+Thought: (brief explanation)
+Plan:
+```json
+[
+  {{"step": "...", "worker": "content ordering"}},
+  {{"step": "...", "worker": "text structuring"}},
+  {{"step": "...", "worker": "surface realization"}}
+]
 ```
 
 Procedure to follow:
@@ -218,56 +233,58 @@ AGENT_HUMAN_PROMPT = """{input}
  (reminder to respond in a JSON blob no matter what)"""
  
 content_ordering = """Role:
-- The Content Ordering agent arranges input data into a logical sequence to facilitate coherent text generation.
+- The Content Ordering agent arranges input data into a logical sequence in the way it is to be verbalized to facilitate coherent text generation.
 
 Responsibilities:
-- Identify a logical, natural, or informative sequence for presenting data.
-- Order content based on temporal (chronological), thematic, or narrative criteria.
-- Avoid repetition and awkward transitions between elements.
+- Identify relevant elements from the input (e.g., page title, section title, show title, notes, year, role).
+- Reorder them logically based on how they should appear when verbalized (e.g., show → role → notes).
+- Keep the XML/tags unchanged, only change the order of <cell> elements within their parent blocks.
+- Ensure that no fields are skipped or merged.
 
 Outcome:
-- A clearly ordered structure of data elements that informs subsequent text structuring and surface realization.
-
-Example:
-Table data (only the table data matter): <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
-<section_title> Schedule </section_title> 
-<table> 
-    <cell> August 1 <col_header> Date </col_header> </cell> 
-    <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> 
-    <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell> 
-</table>
-Outcome: <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
-<section_title> Schedule </section_title> 
-<table> 
-  <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> 
-  <cell> August 1 <col_header> Date </col_header> </cell> 
-  <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell> 
-</table>
+- The same XML/table structure as input, but reordered for coherence.
 """
+# Example:
+# Table data (only the table data matter): <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
+# <section_title> Schedule </section_title> 
+# <table> 
+#     <cell> August 1 <col_header> Date </col_header> </cell> 
+#     <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> 
+#     <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell> 
+# </table>
+# Outcome: <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
+# <section_title> Schedule </section_title> 
+# <table> 
+#   <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> 
+#   <cell> August 1 <col_header> Date </col_header> </cell> 
+#   <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell> 
+# </table>
+# """
 
 text_structuring = """Role:
-- The Text Structuring agent organizes ordered content into a structured textual framework suitable for natural language generation.
+- The Text Structuring agent organizes the ordered content into a structured textual framework suitable for natural language generation. Specifying the information in each sentence and/or paragraph so that it will be verbalized in that structure
 
 Responsibilities:
-- Group ordered data into meaningful units.
-- Apply rhetorical and logical structures to enhance coherence and readability.
-- Clearly segment data at sentence or paragraph levels.
+- Group ordered elements into sentence-level containers using <snt> tags.
+- For each sentence unit, combine only logically related facts (e.g., a show + role + note).
+- Ensure each field appears once across the structure.
+- Do not reorder cells; use them in the order provided.
 
 Outcome:
-- A structured representation of content that guides the surface realization stage.
-
-Example:
-Table data (only the table data matter): <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
-<section_title> Schedule </section_title> 
-<table> 
-  <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> <cell> August 1 <col_header> Date </col_header> </cell> <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell> 
-</table>
-Outcome: <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
-<section_title> Schedule </section_title> 
-<table> 
-  <snt> <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> <cell> August 1 <col_header> Date </col_header> </cell> <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell></snt>
-</table>
+- A <table> where <snt> segments wrap coherent, sentence-level information chunks.
 """
+# Example:
+# Table data (only the table data matter): <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
+# <section_title> Schedule </section_title> 
+# <table> 
+#   <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> <cell> August 1 <col_header> Date </col_header> </cell> <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell> 
+# </table>
+# Outcome: <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
+# <section_title> Schedule </section_title> 
+# <table> 
+#   <snt> <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> <cell> August 1 <col_header> Date </col_header> </cell> <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell></snt>
+# </table>
+# """
 
 surface_realization = """Role:
 - The Surface Realization agent transforms structured content into fluent, grammatically correct natural language text.
@@ -279,13 +296,13 @@ Responsibilities:
 
 Outcome:
 - Final natural language text suitable for immediate presentation.
-
-Example:
-Table data (only the table data matter): <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
-<section_title> Schedule </section_title> 
-<table> 
-  <snt> <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> <cell> August 1 <col_header> Date </col_header> </cell> <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell></snt>
-</table>
-Outcome: The Toyota Tundra 200 was held on August 1 at the Nashville Superspeedway.
 """
+# Example:
+# Table data (only the table data matter): <page_title> 2009 NASCAR Camping World Truck Series </page_title> 
+# <section_title> Schedule </section_title> 
+# <table> 
+#   <snt> <cell> Toyota Tundra 200 <col_header> Event </col_header> </cell> <cell> August 1 <col_header> Date </col_header> </cell> <cell> Nashville Superspeedway <col_header> Venue </col_header> </cell></snt>
+# </table>
+# Outcome: The Toyota Tundra 200 was held on August 1 at the Nashville Superspeedway.
+# """
 

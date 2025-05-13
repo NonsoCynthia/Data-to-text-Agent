@@ -23,6 +23,7 @@ class Planner:
             agent_input = "\n".join(["INPUT\n----- ----- ----- -----", chat_history, f"USER: {state['input']}"]).strip()
             # print(agent_input)
             agent_response = planner.invoke({'input': agent_input}).content
+            print(f"PLANNER: {agent_response}")
             
             # print(agent_response)
             # regular expression to extract thought and response

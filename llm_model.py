@@ -4,7 +4,7 @@ from langchain_ollama import ChatOllama
 from typing import Dict, List, Optional, Text
 
 class OllamaModel:
-    def __init__(self, model_name: str = "llama3.2", temperature: float = 0):
+    def __init__(self, model_name: str = "llama3.2", temperature: float = 0.3):
         self.model_name = model_name
         self.temperature = temperature
         self.llm = ChatOllama(model=self.model_name, temperature=self.temperature)

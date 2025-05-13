@@ -64,6 +64,7 @@ class Orchestrator:
                 or (state["plan"] is None and team_iterations < recursion_limit)
             ):
                 agent_response = orchestrator.invoke({"input": inp}).content
+                print(f"ORCHESTRATOR: {agent_response}")
                 try:
                     thought, next, next_input = re.findall(
                         r"Thought:\s*(.*?)\s*Worker:\s*(.*?)\s*Worker Input:\s*(.*)", agent_response, re.DOTALL
