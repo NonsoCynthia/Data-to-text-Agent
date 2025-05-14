@@ -1,10 +1,10 @@
 import re
 import json
 from langchain.agents import AgentExecutor
-from utils import StageExecute, ResultStep
-from llm_model import OllamaModel
-from agent_prompts import INSPECTOR_PROMPT, INSPECTOR_INPUT
-from orchestrator import prepare_result_steps
+from ..utilities.utils import StageExecute, ResultStep
+from ..agents.llm_model import OllamaModel
+from ..agents.agent_prompts import INSPECTOR_PROMPT, INSPECTOR_INPUT
+from agent_utils import prepare_result_steps
 
 
 class Inspector:

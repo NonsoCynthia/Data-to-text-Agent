@@ -2,9 +2,9 @@ import re
 import json
 from typing import Optional
 from langchain.agents import AgentExecutor
-from utils import StageExecute, ResultStep
-from llm_model import OllamaModel
-from agent_prompts import PLANNER_PROMPT
+from agents.utilities.utils import StageExecute, ResultStep
+from agents.llm_model import OllamaModel
+from agents.agent_prompts import PLANNER_PROMPT
 
 
 # Implementing the abstract class
@@ -25,7 +25,6 @@ class Planner:
             agent_response = planner.invoke({'input': agent_input}).content
             print(f"PLANNER: {agent_response}")
             
-            # print(agent_response)
             # regular expression to extract thought and response
             try:
                 thought, plans = re.findall(

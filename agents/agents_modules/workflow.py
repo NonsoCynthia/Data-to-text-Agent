@@ -1,15 +1,14 @@
-from langgraph.graph import START, END, StateGraph
-from utils import StageExecute, Agent, AgentExecuteInput
-from langgraph.graph import START, END, StateGraph
-from utils import StageExecute, Agent, AgentExecuteInput
-from IPython.display import Image, display
 from typing import List, Literal, Optional, Text, Union, Dict, Any
-from planner import Planner
-from orchestrator import Orchestrator
-from worker import Worker
-from inspector import Inspector
-from aggregator import ResponseAggregator
-from agent_prompts import content_ordering, text_structuring, surface_realization
+from IPython.display import Image, display
+from langgraph.graph import START, END, StateGraph
+from agents.utilities.utils import StageExecute, Agent, AgentExecuteInput
+from agents.utilities.utils import StageExecute, Agent, AgentExecuteInput
+from agents_modules.planner import Planner
+from agents.agents_modules.orchestrator import Orchestrator
+from agents.agents_modules.worker import Worker
+from agents.agents_modules.inspector import Inspector
+from agents.agents_modules.aggregator import ResponseAggregator
+from agents.agent_prompts import content_ordering, text_structuring, surface_realization
 
 
 workers_dict = {

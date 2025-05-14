@@ -1,8 +1,8 @@
 from langchain.agents import AgentExecutor
-from utils import StageExecute, ResultStep
-from llm_model import OllamaModel
-from agent_prompts import AGGREGATOR_PROMPT, AGGREGATOR_INPUT
-from orchestrator import prepare_result_steps
+from agents.utilities.utils import StageExecute, ResultStep
+from agents.llm_model import OllamaModel
+from agents.agent_prompts import AGGREGATOR_PROMPT, AGGREGATOR_INPUT
+from agents.utilities.agent_utils import prepare_result_steps
 
 
 # Implementing the abstract class
