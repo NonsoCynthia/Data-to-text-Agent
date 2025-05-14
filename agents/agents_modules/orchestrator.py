@@ -4,7 +4,7 @@ from langchain.agents import AgentExecutor
 from agents.utilities.utils import StageExecute, ResultStep
 from agents.llm_model import OllamaModel
 from agents.agent_prompts import ORCHESTRATOR_PROMPT
-from agents.utilities.agent_utils import prepare_result_steps, prepare_tool_intermediate_steps
+from agents.utilities.agent_utils import prepare_result_steps, prepare_tool_result_steps
 
 
 

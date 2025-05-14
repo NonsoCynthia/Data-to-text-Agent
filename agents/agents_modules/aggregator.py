@@ -35,6 +35,7 @@ class ResponseAggregator:
                 agent_response = "I couldn't provide an answer because the maximum number of iterations was reached. Please try breaking the instruction into smaller questions by looking at the intermediate steps."
             else:
                 agent_response = aggregator.invoke({'input': input_}).content
+                agent_response = agent_response.replace("Final Answer:", "").strip()
                 print(f"AGGREGATOR: {agent_response}")
 
             result_steps.append(
@@ -46,7 +47,7 @@ class ResponseAggregator:
             )
             return {
                 "response": agent_response,
-                "intermediate_steps": result_steps,
+                "result_steps": result_steps,
             }
 
         return run

@@ -5,7 +5,7 @@ from langgraph.errors import GraphRecursionError
 from agents.utilities.utils import StageExecute, ResultStep, ToolIntermediateStep
 from agents.llm_model import OllamaModel
 from agents.agent_prompts import WORKER_PROMPT, AGENT_SYSTEM_PROMPT, AGENT_HUMAN_PROMPT
-from agents.utilities.agent_utils import validate_input_variables, prepare_tool_intermediate_steps
+from agents.utilities.agent_utils import validate_input_variables, prepare_tool_result_steps
 
 
 
@@ -33,7 +33,7 @@ class Worker:
             verbose=True,
             max_iterations=max(4, 4 * len(tools)),
             handle_parsing_errors=True,
-            return_intermediate_steps=True,
+            return_result_steps=True,
         )
         return agent_executor
 
@@ -48,17 +48,17 @@ class Worker:
                 result = worker.invoke({"input": agent_input})
                 if isinstance(result, dict):
                     response_text = result.get("output") or result.get("action_input") or str(result)
-                    tool_intermediate_steps = prepare_tool_intermediate_steps(result.get("result_steps", []))
+                    tool_result_steps = prepare_tool_result_steps(result.get("result_steps", []))
                 elif hasattr(result, "content"):
                     response_text = result.content
-                    tool_intermediate_steps = []
+                    tool_result_steps = []
                 else:
                     response_text = str(result)
-                    tool_intermediate_steps = []
+                    tool_result_steps = []
 
             except GraphRecursionError:
                 response_text = "The agent reached the maximum number of iterations and could not solve the problem. Split the problem into multiple tasks."
-                tool_intermediate_steps = []
+                tool_result_steps = []
 
             result_steps.append(
                 ResultStep(
@@ -66,7 +66,7 @@ class Worker:
                     input=agent_input,
                     output=response_text,
                     thought=response_text,
-                    tool_steps=tool_intermediate_steps,
+                    tool_steps=tool_result_steps,
                 )
             )
 
