@@ -165,3 +165,21 @@ def prepare_chat_history_xml(chat_history: List[Dict[str, str]]) -> str:
         return ""
 
     return render_chat_history_xml(chat_history)
+
+
+def evaluate_with_comet_referenceless(prediction: str, input_data: str):
+    """
+    Evaluates a list of generation pairs using referenceless COMET.
+    Args:
+        prediction (str): The prediction to evaluate.
+        input_data (str): The reference to evaluate against.
+    Returns:
+        Tuple[float, List[float]]: (average_score, list_of_scores)
+    """
+    from comet import download_model, load_from_checkpoint
+
+    model_path = download_model("Unbabel/wmt22-cometkiwi-da")
+    model = load_from_checkpoint(model_path)
+
+    model_output = model.predict([{'src': input_data, 'mt': prediction}], gpus=1)
+    return model_output[0], model_output[1]
