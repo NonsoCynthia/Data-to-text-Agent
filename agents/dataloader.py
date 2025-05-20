@@ -75,7 +75,7 @@ def extract_example(dataset_name: str, example: Dict) -> Dict:
 
 # Example usage
 if __name__ == "__main__":
-    name = "mlb"  # Change this to the dataset you want to load
+    name = "dart"  # Change this to the dataset you want to load
     data = load_dataset_by_name(name)
     sample = extract_example(name, data["test"][0])
     print(sample)

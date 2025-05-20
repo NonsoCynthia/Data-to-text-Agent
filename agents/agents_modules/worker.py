@@ -3,7 +3,7 @@ from langchain.agents import AgentExecutor, create_json_chat_agent
 from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
 from langgraph.errors import GraphRecursionError
 from agents.utilities.utils import StageExecute, ResultStep, ToolIntermediateStep
-from agents.llm_model import OllamaModel
+from agents.llm_model import UnifiedModel, model_name
 from agents.agent_prompts import WORKER_PROMPT, AGENT_SYSTEM_PROMPT, AGENT_HUMAN_PROMPT
 from agents.utilities.agent_utils import validate_input_variables, prepare_tool_result_steps
 
@@ -11,8 +11,13 @@ from agents.utilities.agent_utils import validate_input_variables, prepare_tool_
 
 class Worker:
     @classmethod
-    def create_model(cls, agent_description: Text, tools: List[Any], query: Union[Text, Dict[str, Any]]) -> AgentExecutor:
-        llm = OllamaModel().raw_model()
+    def create_model(cls, agent_description: Text, tools: List[Any], query: Union[Text, Dict[str, Any]], provider: str = "ollama") -> AgentExecutor:
+        params = model_name.get(provider.lower())
+        llm = UnifiedModel(
+                            provider=provider,
+                            model_name=params['model'],
+                            temperature=params['temperature'],
+                        ).raw_model()
         sys_message = AGENT_SYSTEM_PROMPT
 
         if agent_description:
@@ -46,6 +51,7 @@ class Worker:
 
             try:
                 result = worker.invoke({"input": agent_input})
+                print(f"WORKER: {result}")
                 if isinstance(result, dict):
                     response_text = result.get("output") or result.get("action_input") or str(result)
                     tool_result_steps = prepare_tool_result_steps(result.get("result_steps", []))

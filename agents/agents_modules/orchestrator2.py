@@ -2,7 +2,7 @@ import re
 from typing import Dict, List, Text, Any, Optional
 from langchain.agents import AgentExecutor
 from agents.utilities.utils import StageExecute, ResultStep
-from agents.llm_model import OllamaModel
+from agents.llm_model import UnifiedModel, model_name
 from agents.agent_prompts import ORCHESTRATOR_PROMPT
 from agents.utilities.agent_utils import  prepare_result_steps, render_result_steps_xml, render_chat_history_xml, add_content_to_chat_history, prepare_chat_history_xml
 
@@ -10,8 +10,13 @@ from agents.utilities.agent_utils import  prepare_result_steps, render_result_st
 
 class Orchestrator:
     @classmethod
-    def create_model(cls) -> AgentExecutor:
-        generator = OllamaModel()
+    def create_model(cls, provider: str = "ollama") -> AgentExecutor:
+        params = model_name.get(provider.lower())
+        generator = UnifiedModel(
+                            provider=provider,
+                            model_name=params['model'],
+                            temperature=params['temperature'],
+                        )
         orchestrator = generator.model_(ORCHESTRATOR_PROMPT)
         return orchestrator
 

@@ -1,0 +1,18 @@
+aiohttp==3.11.18
+bert-score==0.3.13
+bleurt-pytorch==0.0.1
+ipython==8.36.0
+langchain==0.3.25
+langchain-ollama==0.3.3
+pip==25.1
+python-dotenv==1.1.0
+rouge_score==0.1.2
+torchaudio==2.6.0.dev20250515+cu128
+torchvision==0.22.0.dev20250515+cu128
+triton==3.3.0
+unbabel-comet==2.2.1
+wheel==0.45.1
+ipykernel
+langgraph
+evaluate
+#pip list --format=freeze --not-required > requirements.txt

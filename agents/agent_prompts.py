@@ -52,7 +52,7 @@ Plan:
 ```
 """
 
-ORCHESTRATOR_PROMPT = """You are the orchestrator agent responsible for coordinating the execution of a multi-stage data-to-text task involving the following workers:
+PLAN_ORCHESTRATOR_PROMPT = """You are the orchestrator agent responsible for coordinating the execution of a multi-stage data-to-text task involving the following workers:
 
 - 'content ordering' (selects and orders the relevant information from the data in the way it should be verbalized using the provided data structure)
 - 'text structuring' (organizes selected data or information into paragraphs or sentences, ensuring logical flow and coherence)
@@ -66,6 +66,32 @@ ORCHESTRATOR_PROMPT = """You are the orchestrator agent responsible for coordina
 Thought: Justify your decision considering the user's request and current progress.
 Worker: Name of the worker or 'FINISH'
 Worker Input: Comprehensive context for the worker (or explanation if finished)
+"""
+
+ORCHESTRATOR_PROMPT = """You are the orchestrator agent for a structured data-to-text generation task. You manage the execution of three specialized workers:
+
+- 'content ordering': selects and arranges relevant fields from the input data in the order they should appear in the final text.
+- 'text structuring': organizes ordered fields into sentence- or paragraph-level groupings.
+- 'surface realization': generates fluent natural language text from the structured content.
+
+*** Permitted Workers ***
+- You may only use the workers listed above. Do NOT invoke or mention any other agents, tools, or names.
+
+*** Workflow Sequence ***
+- Always begin with 'content ordering'.
+- Follow with 'text structuring'.
+- Conclude with 'surface realization'.
+- Return 'FINISH' only after verifying the final output is present and correct.
+
+*** Evaluation Rules ***
+- If a step has already been completed correctly, skip it.
+- If the input is malformed or missing key fields, return 'FINISH' with an error explanation.
+- Each worker must receive the full current context: original input + intermediate steps.
+
+*** Output Format ***
+Thought: (Your reasoning, considering all inputs and completed steps)
+Worker: (Exactly one of 'content ordering', 'text structuring', 'surface realization', or 'FINISH')
+Worker Input: (If FINISH, explain why. Otherwise, provide contextualized input for the next worker)
 """
 
 WORKER_PROMPT = """You are a specialized agent assigned to perform a specific roles:

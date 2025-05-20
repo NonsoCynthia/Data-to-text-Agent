@@ -1,81 +1,82 @@
 import re
-import json
 from langchain.agents import AgentExecutor
 from agents.utilities.utils import StageExecute, ResultStep
-from agents.llm_model import OllamaModel
-from agents.agent_prompts import INSPECTOR_PROMPT, INSPECTOR_INPUT
+from agents.llm_model import UnifiedModel, model_name
+from agents.agent_prompts import INSPECTOR_PROMPT
 from agents.utilities.agent_utils import prepare_result_steps
 
 
 class Inspector:
     @classmethod
-    def create_model(cls) -> AgentExecutor:
-        generator = OllamaModel()
+    def create_model(cls, provider: str = "ollama") -> AgentExecutor:
+        params = model_name.get(provider.lower())
+        generator = UnifiedModel(
+                            provider=provider,
+                            model_name=params['model'],
+                            temperature=params['temperature'],
+                        )
         return generator.model_(INSPECTOR_PROMPT)
 
     @classmethod
     def run_model(cls, inspector: AgentExecutor):
         def run(state: StageExecute):
-            chat_history = state.get("chat_history", [])
-            chat_str = "\n".join(f"{msg['role'].upper()}: {msg['content']}" for msg in chat_history).strip()
-            agent_input = f"INPUT\n--------------------\n{chat_str}\nUSER: {state['input']}".strip()
-
-            recursion_limit = state.get("recursion_limit", 50)
-            team_iterations = state.get("team_iterations", 0) + 1
             result_steps = state.get("result_steps", [])
-            plan = state.get("plan", [])
+            team_iterations = state.get("team_iterations", 0)
+            recursion_limit = state.get("recursion_limit", 50)
+            chat_input = state.get("input", "")
 
-            solvable_steps = [step for step in plan if step.get("worker") != "NOT_SOLVABLE"]
+            # Prepare the result steps as readable context
+            result_steps_str = "\n\n".join(prepare_result_steps(result_steps)) or "No results."
+            last_worker_step = result_steps[-1] if result_steps else None
 
-            if solvable_steps:
-                plan_str = "\n".join(
-                    f"Step {i+1}: Worker '{step['worker']}' - '{step['step']}'"
-                    for i, step in enumerate(plan)
-                )
-                result_steps_str = prepare_result_steps(result_steps)
-                result_steps_str = "\n\n".join(result_steps_str) if result_steps_str else "No result steps."
-                
-                print(f"RESULT STEPS: {result_steps_str}")
+            # Compose input for inspector agent
+            inspector_input = f"""
+You are an inspector reviewing the output of a worker agent in a data-to-text task.
 
-                inspector_input = INSPECTOR_INPUT.format(
-                    input=agent_input,
-                    result_steps=result_steps_str,
-                    plan=plan_str,
-                )
+Task: Determine whether the most recent worker's output is CORRECT.
 
-                agent_response = inspector.invoke({"input": inspector_input}).content
-                print(f"INSPECTOR: {agent_response}")
-                feedback = agent_response.lower().split('feedback:')[-1].strip()
+Criteria:
+- The output must reflect all data fields correctly.
+- No hallucination (i.e., extra facts not present in the input).
+- No missing fields.
+- The response must be coherent and fulfill the task assigned to the worker.
 
-                if feedback == "correct":
-                    # advance plan
-                    updated_plan = plan[1:] if plan else []
-                    output = "done" if not updated_plan else None
-                else:
-                    updated_plan = plan
-                    output = "incomplete" if team_iterations >= recursion_limit else None
-            else:
-                feedback = "The assigned task cannot be solved by the team."
-                updated_plan = []
-                output = "done"
+Respond ONLY with one of the following:
+- CORRECT
+- One sentence explanation of the issue.
 
+Input: {chat_input}
+
+Completed Steps:
+{result_steps_str}
+""".strip()
+
+            # Get feedback
+            agent_response = inspector.invoke({"input": inspector_input}).content.strip()
+            print(f"INSPECTOR: {agent_response}")
+
+            # Determine status
+            is_correct = agent_response.strip().upper() == "CORRECT"
+            output = "done" if is_correct else ("incomplete" if team_iterations < recursion_limit else "halt")
+            next_node = "orchestrator"
+
+            # Log step
             result_steps.append(
                 ResultStep(
-                    input=agent_input,
-                    output=feedback,
+                    input=inspector_input,
+                    output=agent_response,
                     agent="inspector",
-                    thought="",
+                    thought="Evaluation of last worker result.",
                 )
             )
 
             return {
                 "response": output,
-                "plan": updated_plan,
                 "result_steps": result_steps,
-                "team_iterations": team_iterations,
+                "team_iterations": team_iterations + 1,
                 "recursion_limit": recursion_limit,
-                "next": "aggregator" if output == "done" else "orchestrator",
-                "next_input": state.get("input", "")
+                "next": next_node,
+                "next_input": chat_input,
             }
 
         return run

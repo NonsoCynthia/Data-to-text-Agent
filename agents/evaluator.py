@@ -26,47 +26,50 @@ bleurt_model.eval()
 # Load once: BERTScore evaluator
 bertscore_metric = evaluate.load("bertscore")
 
+def ensure_list(x):
+    return x if isinstance(x, list) else [x]
 
-def evaluate_single(ground_truth: str, prediction: str, source: str = "") -> dict:
+def evaluate_single(references, prediction, sources=None) -> dict:
     """
-    Evaluate a single prediction against the ground truth using multiple metrics.
+    Evaluate a single prediction against multiple ground truth references.
 
     Args:
-        ground_truth (str): The reference text.
-        prediction (str): The predicted/generated text.
-        source (str): The source text (needed for COMET).
+        references (List[str] or str): Reference(s) to compare against.
+        prediction (str): Model prediction.
+        sources (List[str] or str or None): Source text(s) for COMET.
 
     Returns:
-        dict: Dictionary containing evaluation scores.
+        dict: Dictionary containing averaged evaluation scores.
     """
-    # BLEU
-    bleu = sacrebleu.raw_corpus_bleu([prediction], [[ground_truth]], 0.01).score
+    references = ensure_list(references)
+    sources = ensure_list(sources) if sources is not None else references
 
-    # METEOR
-    gt_tokens = word_tokenize(ground_truth)
-    pred_tokens = word_tokenize(prediction)
-    meteor = single_meteor_score(gt_tokens, pred_tokens)
+    # BLEU (supports multiple references)
+    bleu = sacrebleu.raw_corpus_bleu([prediction], [references], 0.01).score
 
-    # ROUGE
-    rouge_s = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
-    rouge = rouge_s.score(ground_truth, prediction)
-    rouge_f1 = sum([
-        rouge['rouge1'].fmeasure,
-        rouge['rouge2'].fmeasure,
-        rouge['rougeL'].fmeasure
-    ]) / 3
+    # METEOR (only one reference supported)
+    meteor = single_meteor_score(
+        word_tokenize(references[0]), word_tokenize(prediction)
+    )
 
-    # COMET
-    comet_input = [{"src": source or ground_truth, "mt": prediction, "ref": ground_truth}]
+    # ROUGE (using only the first reference)
+    rouge_scorer_obj = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+    rouge = rouge_scorer_obj.score(references[0], prediction)
+    rouge_f1 = sum([rouge['rouge1'].fmeasure, rouge['rouge2'].fmeasure, rouge['rougeL'].fmeasure]) / 3
+
+    # COMET (evaluate using the first source and reference)
+    comet_input = [{"src": sources[0], "mt": prediction, "ref": references[0]}]
     comet_score = comet_model.predict(comet_input, gpus=0)[0][0]
 
-    # BLEURT
+    # BLEURT (evaluate using the first reference)
     with torch.no_grad():
-        bleurt_inputs = bleurt_tokenizer(ground_truth, prediction, return_tensors='pt', padding=True)
-        bleurt_output = bleurt_model(**bleurt_inputs).logits.flatten().item()
+        inputs = bleurt_tokenizer(references[0], prediction, return_tensors='pt', padding=True)
+        bleurt_output = bleurt_model(**inputs).logits.flatten().item()
 
-    # BERTScore
-    bert_out = bertscore_metric.compute(predictions=[prediction], references=[ground_truth], lang="en")
+    # BERTScore (supports multiple references)
+    bert_out = bertscore_metric.compute(
+        predictions=[prediction], references=[references], lang="en"
+    )
     bert_f1 = bert_out["f1"][0]
 
     return {
@@ -79,10 +82,11 @@ def evaluate_single(ground_truth: str, prediction: str, source: str = "") -> dic
     }
 
 
+
 if __name__ == "__main__":
-    gt = "Gauff, just 15, shocks 5-time champ Venus, 39, at Wimbledon"
+    gt = ["Gauff, just 15, shocks 5-time champ Venus, 39, at Wimbledon"]
     pred = "15-year-old Gauff beats 5-time Wimbledon champ Venus"
-    src = "Cori Gauff, 15, defeated Venus Williams at Wimbledon."
+    src = ["Cori Gauff, 15, defeated Venus Williams at Wimbledon."]
 
     scores = evaluate_single(gt, pred, src)
     for metric, score in scores.items():

@@ -1,16 +1,21 @@
 import re
 import json
 from langchain.agents import AgentExecutor
-from ..utilities.utils import StageExecute, ResultStep
-from ..agents.llm_model import OllamaModel
-from ..agents.agent_prompts import INSPECTOR_PROMPT, INSPECTOR_INPUT
-from agent_utils import prepare_result_steps
+from agents.utilities.utils import StageExecute, ResultStep
+from agents.llm_model import UnifiedModel, model_name
+from agents.agent_prompts import INSPECTOR_PROMPT, INSPECTOR_INPUT
+from agents.utilities.agent_utils import prepare_result_steps
 
 
-class Inspector:
+class Plan_Inspector:
     @classmethod
-    def create_model(cls) -> AgentExecutor:
-        generator = OllamaModel()
+    def create_model(cls, provider: str = "ollama") -> AgentExecutor:
+        params = model_name.get(provider.lower())
+        generator = UnifiedModel(
+                            provider=provider,
+                            model_name=params['model'],
+                            temperature=params['temperature'],
+                        )
         return generator.model_(INSPECTOR_PROMPT)
 
     @classmethod

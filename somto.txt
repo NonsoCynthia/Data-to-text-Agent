@@ -6,8 +6,8 @@ pandas
 nltk
 rouge_score
 sacrebleu
-unbabel-comet
-torch
+unbabel-comet>=2.0.0
+torch --pre --index-url https://download.pytorch.org/whl/nightly/cu128
 transformers
 bleurt-pytorch
 evaluate
@@ -22,3 +22,6 @@ langchain-experimental
 langchain-openai
 langgraph
 langchainhub
+aixplain
+openai
+IPython

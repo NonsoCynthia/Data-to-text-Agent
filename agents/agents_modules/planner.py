@@ -3,15 +3,20 @@ import json
 from typing import Optional
 from langchain.agents import AgentExecutor
 from agents.utilities.utils import StageExecute, ResultStep
-from agents.llm_model import OllamaModel
+from agents.llm_model import UnifiedModel, model_name
 from agents.agent_prompts import PLANNER_PROMPT
 
 
 # Implementing the abstract class
 class Planner:
     @classmethod
-    def create_model(cls) -> AgentExecutor:
-        generator = OllamaModel()
+    def create_model(cls, provider: str = "ollama") -> AgentExecutor:
+        params = model_name.get(provider.lower())
+        generator = UnifiedModel(
+                            provider=provider,
+                            model_name=params['model'],
+                            temperature=params['temperature'],
+                        )
         planner = generator.model_(PLANNER_PROMPT)
         return planner
     
@@ -84,7 +89,7 @@ class Planner:
 # # Execute the run function with the initial state
 # final_state = run_function(initial_state)
 
-# Output final state
+# # Output final state
 # print(final_state)
 
 # from utils import prepare_result_steps

@@ -1,6 +1,6 @@
 from langchain.agents import AgentExecutor
 from agents.utilities.utils import StageExecute, ResultStep
-from agents.llm_model import OllamaModel
+from agents.llm_model import UnifiedModel, model_name
 from agents.agent_prompts import AGGREGATOR_PROMPT, AGGREGATOR_INPUT
 from agents.utilities.agent_utils import prepare_result_steps
 
@@ -8,8 +8,13 @@ from agents.utilities.agent_utils import prepare_result_steps
 # Implementing the abstract class
 class ResponseAggregator:
     @classmethod
-    def create_model(cls) -> AgentExecutor:
-        generator = OllamaModel()
+    def create_model(cls, provider: str = "ollama") -> AgentExecutor:
+        params = model_name.get(provider.lower())
+        generator = UnifiedModel(
+                            provider=provider,
+                            model_name=params['model'],
+                            temperature=params['temperature'],
+                        )
         aggregator = generator.model_(AGGREGATOR_PROMPT)
         return aggregator
     

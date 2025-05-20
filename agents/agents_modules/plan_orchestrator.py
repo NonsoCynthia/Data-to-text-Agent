@@ -1,18 +1,23 @@
 import re
 from typing import Dict, List, Text, Any, Optional
 from langchain.agents import AgentExecutor
-from ..utilities.utils import StageExecute, ResultStep
-from ..agents.llm_model import OllamaModel
-from ..agents.agent_prompts import ORCHESTRATOR_PROMPT
-from agent_utils import  prepare_result_steps, render_intermediate_steps_xml, render_chat_history_xml, add_content_to_chat_history, prepare_chat_history_xml
+from agents.utilities.utils import StageExecute, ResultStep
+from agents.llm_model import UnifiedModel, model_name
+from agents.agent_prompts import PLAN_ORCHESTRATOR_PROMPT
+from agents.utilities.agent_utils import prepare_result_steps, prepare_tool_result_steps
 
 
 
-class Orchestrator:
+class Plan_Orchestrator:
     @classmethod
-    def create_model(cls) -> AgentExecutor:
-        generator = OllamaModel()
-        orchestrator = generator.model_(ORCHESTRATOR_PROMPT)
+    def create_model(cls, provider: str = "ollama") -> AgentExecutor:
+        params = model_name.get(provider.lower())
+        generator = UnifiedModel(
+                            provider=provider,
+                            model_name=params['model'],
+                            temperature=params['temperature'],
+                        )
+        orchestrator = generator.model_(PLAN_ORCHESTRATOR_PROMPT)
         return orchestrator
 
 
@@ -30,7 +35,8 @@ class Orchestrator:
             result_steps = state["result_steps"] or []
             result_steps_str = prepare_result_steps(result_steps)
             if result_steps_str:
-                inp = f"{'\n\n'.join(result_steps_str)}\n\n{inp}"
+                joined_steps = "\n\n".join(result_steps_str)
+                inp = f"{joined_steps}\n\n{inp}"
 
             if state["plan"] is not None:
                 plan = state["plan"]
