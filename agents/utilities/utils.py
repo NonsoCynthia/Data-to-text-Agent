@@ -44,44 +44,44 @@ class StageExecute(TypedDict, total=False):  # set total=False to make all keys 
 #     recursion_limit: int = 100
 #     current_step: int
     
-class Role(str, Enum):
-    USER = "user"
-    ASSISTANT = "assistant"
-    SYSTEM = "system"
+# class Role(str, Enum):
+#     USER = "user"
+#     ASSISTANT = "assistant"
+#     SYSTEM = "system"
 
-    def __str__(self):
-        return self._value_
+#     def __str__(self):
+#         return self._value_
     
-class Message(BaseModel):
-    id: Text = Field(default_factory=lambda: str(uuid4()))
-    role: Role
-    content: Text
-    result_steps: List[ResultStep] = []
+# class Message(BaseModel):
+#     id: Text = Field(default_factory=lambda: str(uuid4()))
+#     role: Role
+#     content: Text
+#     result_steps: List[ResultStep] = []
     
-class AgentResponse(BaseModel):
-    """Agent Response to be returned to the user."""
-    input: Union[Text, Dict[str, Any]]
-    output: Any
-    feedback: Text = ""
-    result_steps: List[ResultStep] = []
-    plan: Optional[List[Dict[Text, Text]]] = None
+# class AgentResponse(BaseModel):
+#     """Agent Response to be returned to the user."""
+#     input: Union[Text, Dict[str, Any]]
+#     output: Any
+#     feedback: Text = ""
+#     result_steps: List[ResultStep] = []
+#     plan: Optional[List[Dict[Text, Text]]] = None
 
-class Agent(BaseModel):
-    name: Text
-    role: Optional[Text] = None
-    instruction: Optional[Text] = None
-    description: Optional[Text] = None
-    # tasks: Optional[List[Task]] = None
-    # assets: List[Union[ModelTool, PipelineTool, UtilityTool, SQLTool]]
-    # tools: Optional[List[ExternalTool]] = None
+# class Agent(BaseModel):
+#     name: Text
+#     role: Optional[Text] = None
+#     instruction: Optional[Text] = None
+#     description: Optional[Text] = None
+#     tasks: Optional[List[Task]] = None
+#     assets: List[Union[ModelTool, PipelineTool, UtilityTool, SQLTool]]
+#     tools: Optional[List[ExternalTool]] = None
     
-class AgentResponseStatus(str, Enum):
-    SUCCESS = "SUCCESS"
-    FAILED = "FAILED"
+# class AgentResponseStatus(str, Enum):
+#     SUCCESS = "SUCCESS"
+#     FAILED = "FAILED"
 
-class AgentExecuteInput(BaseModel):
-    agent: Union[Agent, Text] 
-    query: Union[Text, Dict[str, Text]] #User input
-    chat_history: Optional[List[Message]] = None
+# class AgentExecuteInput(BaseModel):
+#     agent: Union[Agent, Text] 
+#     query: Union[Text, Dict[str, Text]] #User input
+#     chat_history: Optional[List[Message]] = None
 
 
