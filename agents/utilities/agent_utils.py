@@ -1,6 +1,15 @@
 import re
 from typing import Dict, List, Text, Any, Union, Tuple
 from agents.utilities.utils import StageExecute, ResultStep, ToolIntermediateStep
+import torch
+from comet import download_model, load_from_checkpoint
+
+
+# Optional: configure matmul for Tensor Cores
+torch.set_float32_matmul_precision("high")
+
+# Load once
+_comet_model = None
 
 
 def validate_input_variables(template: Text, input_variables: Union[Text, Dict[Text, Text]]) -> Text:
@@ -146,40 +155,33 @@ def render_chat_history_xml(chat_history: List[Dict[str, str]]) -> str:
     return "\n".join(chat_strings)
 
 
-def add_content_to_chat_history(chat_history: List[Dict[str, str]], content: Text, role: Text) -> List[Dict[str, str]]:
-    """Add content to the chat history."""
-    chat_history.append({"role": role, "content": content})
-    return chat_history
+def evaluate_with_comet_referenceless(input_data: str, prediction: str, use_gpu=False):
+    global _comet_model
+
+    if _comet_model is None:
+        model_path = download_model("Unbabel/wmt22-cometkiwi-da")
+        _comet_model = load_from_checkpoint(model_path)
+
+    torch.cuda.empty_cache()  # Clear previous GPU junk
+
+    gpus = 1 if use_gpu and torch.cuda.is_available() else 0
+    model_output = _comet_model.predict([{'src': input_data, 'mt': prediction}], gpus=gpus)
 
 
-def prepare_chat_history_xml(chat_history: List[Dict[str, str]]) -> str:
-    """Format chat history for display using XML format.
+    return round(model_output.system_score, 3)
 
-    Args:
-        chat_history: List of chat message dictionaries with 'role' and 'content' keys
 
-    Returns:
-        XML-formatted string representing the chat history, or empty string if no history
+def get_inspector_validated_workers(result_steps):
     """
-    if not chat_history:
-        return ""
-
-    return render_chat_history_xml(chat_history)
-
-
-def evaluate_with_comet_referenceless(prediction: str, input_data: str):
+    Return a set of worker names that have been validated as CORRECT by the inspector.
     """
-    Evaluates a list of generation pairs using referenceless COMET.
-    Args:
-        prediction (str): The prediction to evaluate.
-        input_data (str): The reference to evaluate against.
-    Returns:
-        Tuple[float, List[float]]: (average_score, list_of_scores)
-    """
-    from comet import download_model, load_from_checkpoint
-
-    model_path = download_model("Unbabel/wmt22-cometkiwi-da")
-    model = load_from_checkpoint(model_path)
-
-    model_output = model.predict([{'src': input_data, 'mt': prediction}], gpus=1)
-    return model_output[0], model_output[1]
+    validated = set()
+    for i, step in enumerate(result_steps):
+        if step.agent == "inspector" and str(step.output).strip().upper() == "CORRECT":
+            # Find the previous worker step
+            for j in range(i - 1, -1, -1):
+                prev = result_steps[j]
+                if prev.agent not in ["inspector", "orchestrator", "planner"]:
+                    validated.add(prev.agent.lower())
+                    break
+    return validated

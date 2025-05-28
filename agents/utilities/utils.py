@@ -20,6 +20,7 @@ class ResultStep(BaseModel):
     
 class StageExecute(TypedDict, total=False):  # set total=False to make all keys optional
     input: Union[Text, Dict[str, Any]]
+    raw_input: Union[Text, Dict[str, Any]]
     plan: List[Dict[str, Any]]
     result_steps: List[ResultStep]
     chat_history: List[Dict[str, Any]]
@@ -27,6 +28,7 @@ class StageExecute(TypedDict, total=False):  # set total=False to make all keys 
     next_input: str
     response: str
     agent_outcome: str
+    inspector_feedback: str
     team_iterations: int
     recursion_limit: int
     current_step: int

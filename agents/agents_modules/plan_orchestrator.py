@@ -76,7 +76,8 @@ class Plan_Orchestrator:
                 )
             )
             if next in workers:
-                return {"next": next, 
+                return {"next": next,
+                        "thought": thought, 
                         "next_input": next_input,
                         "result_steps": result_steps,
                         "team_iterations": team_iterations + 1,
@@ -84,6 +85,7 @@ class Plan_Orchestrator:
             else:
                 return {
                     "next": "inspector" if state["plan"] is not None else "FINISH",
+                    "thought": thought,
                     "next_input": next_input,
                     "response": response,
                     "result_steps": result_steps,

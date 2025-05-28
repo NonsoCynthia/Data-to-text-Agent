@@ -1,10 +1,7 @@
 import os
-import json
 from typing import List, Literal, Optional, Text, Union, Dict, Any
-from IPython.display import Image, display
 from langgraph.graph import START, END, StateGraph
-from langchain_core.runnables.graph_mermaid import MermaidDrawMethod
-from agents.utilities.utils import StageExecute, Agent, AgentExecuteInput
+from agents.utilities.utils import StageExecute
 from agents.agents_modules.planner import Planner
 from agents.agents_modules.plan_orchestrator import Plan_Orchestrator
 from agents.agents_modules.orchestrator import Orchestrator
@@ -12,22 +9,39 @@ from agents.agents_modules.worker import Worker
 from agents.agents_modules.inspector import Inspector
 from agents.agents_modules.plan_inspector import Plan_Inspector
 from agents.agents_modules.aggregator import ResponseAggregator
-from agents.agent_prompts import content_ordering, text_structuring, surface_realization
+from agents.agent_prompts import CONTENT_ORDERING_PROMPT, TEXT_STRUCTURING_PROMPT, SURFACE_REALIZATION_PROMPT
+from agents.utilities.agent_utils import get_inspector_validated_workers
 
-
-# Worker role prompt descriptions
 WORKER_DESCRIPTIONS = {
-    "content ordering": content_ordering,
-    "text structuring": text_structuring,
-    "surface realization": surface_realization,
+    "content ordering": CONTENT_ORDERING_PROMPT,
+    "text structuring": TEXT_STRUCTURING_PROMPT,
+    "surface realization": SURFACE_REALIZATION_PROMPT,
 }
 
-# Only keys are needed now — value is ignored and injected from above
 workers_dict = {
     "content ordering": "",
     "text structuring": "",
     "surface realization": "",
 }
+
+def add_workers(workers: Dict[str, str], workflow: StateGraph, tools: List[Any], query: Union[str, Dict[str, Any]], provider: str = "ollama") -> List[str]:
+    worker_names = []
+    for name in workers:
+        executor = Worker.create_model(agent_description=WORKER_DESCRIPTIONS.get(name.lower(), ""), tools=tools, query=query, provider=provider)
+        workflow.add_node(name, Worker.run_model(executor, task_name=name))
+        worker_names.append(name)
+    return worker_names
+
+
+# def transition_after_inspection(state: StageExecute) -> Literal["orchestrator", "aggregator", "END"]:
+#     validated = get_inspector_validated_workers(state["result_steps"])
+#     required = {"content ordering", "text structuring", "surface realization"}
+
+#     if state.get("response") == "done":
+#         return "aggregator"
+#     if required.issubset(validated):
+#         return "aggregator"
+#     return "orchestrator"
 
 def transition_after_inspection(state: StageExecute) -> Literal["orchestrator", "aggregator"]:
     """
@@ -47,103 +61,48 @@ def transition_after_inspection(state: StageExecute) -> Literal["orchestrator", 
     # Otherwise, continue looping back to orchestrator
     return "orchestrator"
 
-# def transition_after_inspection(state: StageExecute) -> Literal["orchestrator", "aggregator"]:
-#     """Decides the next stage after inspection based on task correctness."""
-#     if state.get("response") in ["done", "incomplete"]:
-#         return "aggregator"
-#     return "orchestrator"
-
-
-def add_workers(
-    workers: Dict[str, str],  # Keys only are needed
-    workflow: StateGraph,
-    tools: List[Any],
-    query: Union[str, Dict[str, Any]],
-    provider: str = "ollama"
-) -> List[str]:
-    """
-    For each worker name, injects the predefined agent role description,
-    adds the worker as a node in the workflow, and returns all worker names.
-    """
-    worker_names = []
-    for name in workers.keys():
-        # Pull description from the standard map
-        description = WORKER_DESCRIPTIONS.get(name.lower(), "")
-
-        executor = Worker.create_model(
-            agent_description=description,
-            tools=tools,
-            query=query,
-            provider=provider,
-        )
-
-        workflow.add_node(
-            name,
-            Worker.run_model(executor, task_name=name)
-        )
-
-        worker_names.append(name)
-
-    return worker_names
-
-
 
 def build_agent_workflow(add_plan: bool, workers_dict: Dict[str, str], provider: str = "ollama") -> StateGraph:
-    # 1. Create the StateGraph
     agent_workflow = StateGraph(StageExecute)
-
-    # 2. Worker setup
     worker_names = list(workers_dict.keys())
     tools = []
     initial_query = ""
 
-    # 6. Planner integration (optional)
     if add_plan:
         orchestrator = Plan_Orchestrator
-        inspector = Plan_Inspector 
+        inspector = Plan_Inspector
         agent_workflow.add_node("planner", Planner.run_model(Planner.create_model(provider=provider)))
         agent_workflow.add_edge(START, "planner")
         agent_workflow.add_edge("planner", "orchestrator")
         agent_workflow.set_entry_point("planner")
     else:
         orchestrator = Orchestrator
-        inspector = Inspector 
+        inspector = Inspector
         agent_workflow.add_edge(START, "orchestrator")
         agent_workflow.set_entry_point("orchestrator")
 
-    # 3. Add orchestrator
-    orchestrator_node = orchestrator.run_model(orchestrator.create_model(provider=provider), 
-                                               workers=worker_names)
-    
+    orchestrator_node = orchestrator.run_model(orchestrator.create_model(provider=provider), workers=worker_names)
     agent_workflow.add_node("orchestrator", orchestrator_node)
 
-    # 4. Add workers
-    add_workers(workers_dict, agent_workflow, tools, initial_query, provider=provider)
+    add_workers(workers_dict, agent_workflow, tools, initial_query, provider)
 
-    # 5. Add inspector and aggregator
     agent_workflow.add_node("inspector", inspector.run_model(inspector.create_model(provider=provider)))
     agent_workflow.add_node("aggregator", ResponseAggregator.run_model(ResponseAggregator.create_model(provider=provider)))
 
-    # 7. Orchestrator conditional routing
     conditional_map = {name: name for name in worker_names}
-    conditional_map["inspector"] = "inspector"
     conditional_map["FINISH"] = "aggregator"
-    agent_workflow.add_conditional_edges("orchestrator", lambda state: state["next"], conditional_map)
-
-    # 8. Workers report to inspector
-    for name in worker_names:
-        agent_workflow.add_edge(name, "inspector")
-
-    # 9. Inspector conditional routing
+    conditional_map["inspector"] = "inspector"
     agent_workflow.add_conditional_edges("inspector", transition_after_inspection)
 
-    # 10. Final step
+    agent_workflow.add_conditional_edges("orchestrator", lambda state: state['next'], conditional_map)
+
+    for worker in worker_names:
+        agent_workflow.add_edge(worker, "inspector")
+
     agent_workflow.add_edge("aggregator", END)
 
     return agent_workflow.compile()
 
-
-# process_flow = build_agent_workflow(add_plan=False, workers_dict=workers_dict)
 # display(Image(process_flow.get_graph(xray=True).draw_mermaid_png()))
 
 

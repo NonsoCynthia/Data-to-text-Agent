@@ -4,7 +4,7 @@ from langchain.agents import AgentExecutor
 from agents.utilities.utils import StageExecute, ResultStep
 from agents.llm_model import UnifiedModel, model_name
 from agents.agent_prompts import INSPECTOR_PROMPT, INSPECTOR_INPUT
-from agents.utilities.agent_utils import prepare_result_steps
+from agents.utilities.agent_utils import prepare_result_steps, evaluate_with_comet_referenceless
 
 
 class Plan_Inspector:
@@ -24,6 +24,7 @@ class Plan_Inspector:
             chat_history = state.get("chat_history", [])
             chat_str = "\n".join(f"{msg['role'].upper()}: {msg['content']}" for msg in chat_history).strip()
             agent_input = f"INPUT\n--------------------\n{chat_str}\nUSER: {state['input']}".strip()
+            data_input = state.get("raw_input", "")
 
             recursion_limit = state.get("recursion_limit", 50)
             team_iterations = state.get("team_iterations", 0) + 1
@@ -39,18 +40,27 @@ class Plan_Inspector:
                 )
                 result_steps_str = prepare_result_steps(result_steps)
                 result_steps_str = "\n\n".join(result_steps_str) if result_steps_str else "No result steps."
-                
-                print(f"RESULT STEPS: {result_steps_str}")
 
+                metric_result= ""
+                if result_steps_str  == "surface realization":
+                    metric = evaluate_with_comet_referenceless(input_data=data_input, prediction=result_steps_str)
+                    metric_result  = f"Metric Evaluation Result: {metric}"
+
+                # Compose input for inspector agent
                 inspector_input = INSPECTOR_INPUT.format(
                     input=agent_input,
                     result_steps=result_steps_str,
-                    plan=plan_str,
-                )
+                    plan=f"\nPlanning_steps: {plan_str}",
+                    metric_result= metric_result
+                    ).strip()
+                
+                print(f"INSPECTOR INPUT: {inspector_input}")
 
                 agent_response = inspector.invoke({"input": inspector_input}).content
-                print(f"INSPECTOR: {agent_response}")
-                feedback = agent_response.lower().split('feedback:')[-1].strip()
+                feedback = agent_response.split("FEEDBACK:")[-1].strip()
+                state["inspector_feedback"] = agent_response.split("FEEDBACK:")[-1].strip()
+
+                print(f"INSPECTOR: {feedback}")
 
                 if feedback == "correct":
                     # advance plan
