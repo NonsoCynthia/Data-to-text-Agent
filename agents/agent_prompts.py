@@ -62,12 +62,13 @@ ORCHESTRATOR_PROMPT = """You are the orchestrator agent for a structured data-to
 - You may only use one of the three worker names or return 'FINISH'.
 - You must reassign task to the same worker if the inspector feedback indicates that the worker output is incorrect.
 - You must move on to the next worker if the inspector feedback indicates that the workers output is correct.
+- You must redo the surface realization and improve your prompt to it if the inpector indicates that the output is poor and the metric result is below average (0.5).
 
 *** Worker Assignment Criteria ***
 - Assign the next worker based on what remains to be completed.
 - If the task is complete or the input is malformed/missing, return 'FINISH' and explain why.
-- If the inspector’s feedback is 'CORRECT', proceed to the next appropriate worker in the pipeline.
-- If the inspector’s feedback indicates an error, reassign the same worker and revise the Worker Input to address the feedback explicitly. Use the inspector's feedback as a guide to improve the next input. Justify this in your Thought.
+- If the inspector's feedback is 'CORRECT', proceed to the next appropriate worker in the pipeline.
+- If the inspector's feedback indicates an error, reassign the same worker and revise the Worker Input to address the feedback explicitly. Use the inspector's feedback as a guide to improve the next input. Justify this in your Thought.
 
 *** Worker Input Expectations ***
 - Provide each worker with the full original input and the complete history of previous results.
@@ -132,7 +133,7 @@ Special Handling:
 - Do not penalize a text for having tags in it (e.g '<snt>'), it is all part of the text generation task.
 
 Output Format:
-- If correct: return 'CORRECT'
+- If correct: you must return 'CORRECT' only
 - If incorrect: return a short message explaining what is wrong
 
 FEEDBACK:
@@ -217,7 +218,8 @@ Your job is to take ordered content (typically XML or table-based) and group it 
 - Wrap related facts together in <snt> tags to form a logical sentence.
 - Maintain the sequence and integrity of content provided.
 - Do not delete or invent data.
-- Each <snt> should contain a single message unit that will be verbalized later.
+- Each <snt> should contain message unit(s) that will be verbalized later.
+
 
 *** Output Format ***
 Return the input with <snt> groupings inserted inside the table structure.
@@ -244,10 +246,11 @@ Your job is to convert the structured sentence-level content (grouped using <snt
 - Do not include any XML or table tags in your response.
 - Use only the content provided in each <snt> block.
 - Do not hallucinate or omit any factual elements.
-- Your output should read as if written by human.
+- Your output should read as if written by a human.
+- You must not introduce framing phrases, headings, or additional commentary. Only express the content of the <snt> blocks in clean natural language.
 
 *** Output Format ***
-Return a single natural language sentence or paragraph for each <snt> group.
+Return a natural language sentence or paragraph for each <snt> group.
 Ensure clarity, fluency, and correctness.
 """
 # Example:
