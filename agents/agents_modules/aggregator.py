@@ -1,58 +1,39 @@
 from langchain.agents import AgentExecutor
-from agents.utilities.utils import StageExecute, ResultStep
+from agents.utilities.utils import ExecutionState, AgentStepOutput
 from agents.llm_model import UnifiedModel, model_name
 from agents.agent_prompts import AGGREGATOR_PROMPT, AGGREGATOR_INPUT
-from agents.utilities.agent_utils import prepare_result_steps
+from agents.utilities.agent_utils import summarize_agent_steps
 
+class TaskAggregator:
+    @classmethod
+    def init(cls, provider: str = "ollama") -> AgentExecutor:
+        cfg = model_name.get(provider.lower())
+        return UnifiedModel(provider=provider, **cfg).model_(AGGREGATOR_PROMPT)
 
-# Implementing the abstract class
-class ResponseAggregator:
     @classmethod
-    def create_model(cls, provider: str = "ollama") -> AgentExecutor:
-        params = model_name.get(provider.lower())
-        generator = UnifiedModel(
-                            provider=provider,
-                            model_name=params['model'],
-                            temperature=params['temperature'],
-                        )
-        aggregator = generator.model_(AGGREGATOR_PROMPT)
-        return aggregator
-    
-    @classmethod
-    def run_model(cls, aggregator: AgentExecutor):
-        def run(state: StageExecute):
-            chat_history = state["chat_history"] or []
-            chat_history = "\n".join([f"{chats['role'].upper()}: {chats['content']}" for chats in chat_history]).strip()
-            agent_input = "\n".join([chat_history, f"USER: {state['input']}"]).strip()
-            
-            result_steps = state["result_steps"] or []
-            result_steps_str = prepare_result_steps(result_steps)    
-            result_steps_str = ("\n\n".join(result_steps_str) if len(result_steps_str) > 0 else "No result steps.")
-            
-            plan = state["plan"]
-            plan_str = "\n".join(f"Step {i+1}: Worker '{step['worker']}' - '{step['step']}'" for i, step in enumerate(plan) if "worker" in step and "step" in step)
-            input_ = AGGREGATOR_INPUT.format(
-                input=agent_input,
-                result_steps=result_steps_str,
-                plan=plan_str,
-            )
-            if state["response"] == "incomplete":
-                agent_response = "I couldn't provide an answer because the maximum number of iterations was reached. Please try breaking the instruction into smaller questions by looking at the intermediate steps."
+    def compile(cls, executor: AgentExecutor):
+        def run(state: ExecutionState):
+            trace = state.get("dialogue_trace", [])
+            user_msg = f"\n".join(f"{m['role'].upper()}: {m['content']}" for m in trace)
+            prompt = f"{user_msg}\nUSER: {state.get('user_prompt', '')}"
+            plan = state.get("execution_plan", [])
+            plan_str = "\n".join(f"Step {i+1}: Worker '{p['worker']}' - '{p['step']}'" for i, p in enumerate(plan))
+            steps = state.get("history_of_steps", [])
+            step_log = "\n\n".join(summarize_agent_steps(steps)) or "No result steps."
+
+            final_input = AGGREGATOR_INPUT.format(input=prompt, result_steps=step_log, plan=plan_str)
+
+            if state.get("response") == "incomplete":
+                reply = "I couldn't provide an answer because the maximum number of iterations was reached. Please try breaking the instruction into smaller questions by looking at the intermediate steps."
             else:
-                agent_response = aggregator.invoke({'input': input_}).content
-                agent_response = agent_response.replace("Final Answer:", "").strip()
-                print(f"AGGREGATOR: {agent_response}")
+                reply = executor.invoke({"input": final_input}).content.replace("Final Answer:", "").strip()
+                print(f"AGGREGATOR: {reply}")
 
-            result_steps.append(
-                ResultStep(
-                    input=agent_input,
-                    output=agent_response,
-                    agent="aggregator",
-                )
-            )
-            return {
-                "response": agent_response,
-                "result_steps": result_steps,
-            }
+            steps.append(AgentStepOutput(
+                agent_name="aggregator",
+                agent_input=prompt,
+                agent_output=reply
+            ))
 
+            return {"final_response": reply, "history_of_steps": steps}
         return run

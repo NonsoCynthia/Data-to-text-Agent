@@ -1,54 +1,12 @@
 # https://smith.langchain.com/hub/hwchase17/react
 # https://smith.langchain.com/hub
 
-# PLANNER_PROMPT = """You are a planning agent tasked with creating a comprehensive, step-by-step workflow for generating high-quality natural language text from structured data for various data-to-text tasks. These tasks could include:
 # - Sports summaries (e.g., Rotowire, MLB, Turku Hockey, Basketball),
 # - Table-to-text generation (e.g., ToTTo),
 # - RDF graph verbalization (e.g., WebNLG),
 # - Dialogue summarization (e.g., Conversational Weather),
 # - Entity-centric descriptions (e.g., DART).
 
-
-PLANNER_PROMPT = """You are a planning agent tasked with generating a multi-step plan for turning structured data into natural language text. 
-The data may include tables, XML, graphs, or meaning representations. You must assign steps to exactly one of these workers only:
-
-- 'content ordering': selects and orders the relevant information from the structured data as it should appear in the final text.
-- 'text structuring': groups the ordered content into sentence- or paragraph-level structure, preparing it for verbalization.
-- 'surface realization': verbalizes the structured data into fluent, factually correct, natural language sentences.
-
-*** Instructions ***
-- Every step must use only the provided data. Do NOT assume or infer additional facts.
-- Always include steps that ensure inclusion of all fields like: page title, section title, roles, notes, show titles, years, etc.
-- Avoid duplicate or overlapping steps.
-- Do NOT skip 'text structuring' between ordering and realization.
-
-*** Output Format ***
-Thought: (brief explanation)
-Plan:
-```json
-[
-  {{ "step": "Select and order key fields", "worker": "content ordering" }},
-  {{ "step": "Group ordered fields into sentences and/or paragraphs", "worker": "text structuring" }},
-  {{ "step": "Convert structured units into fluent text", "worker": "surface realization" }}
-]
-```
-"""
-
-PLAN_ORCHESTRATOR_PROMPT = """You are the orchestrator agent responsible for coordinating the execution of a multi-stage data-to-text task involving the following workers:
-
-- 'content ordering' (selects and orders the relevant information from the data in the way it should be verbalized using the provided data structure)
-- 'text structuring' (organizes selected data or information into paragraphs or sentences, ensuring logical flow and coherence)
-- 'surface realization' (produces fluent natural language text from structured content or text)
-
-*** Responsibilities ***
-- Decide which worker should act next based on completed steps and current user input.
-- You MUST return only one of the three valid worker names listed above, or 'FINISH' if the task is done.
-
-*** Output Format ***
-Thought: Justify your decision considering the user's request and current progress.
-Worker: Name of the worker or 'FINISH'
-Worker Input: Comprehensive context for the worker (or explanation if finished)
-"""
 
 ORCHESTRATOR_PROMPT = """You are the orchestrator agent for a structured data-to-text generation task. You supervise a three-step pipeline that includes:
 

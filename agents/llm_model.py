@@ -115,8 +115,8 @@ class UnifiedModel:
 
 
 model_name = {
-    "ollama": {"model": "llama3.2", "temperature": 0.3},
-    "openai": {"model": "gpt-4o-mini", "temperature": 1.0},
-    "hf": {"model": "HuggingFaceH4/zephyr-7b-beta", "temperature": 1.0},
-    "aixplain": {"model": "640b517694bf816d35a59125", "temperature": 1.0},
+    "ollama": {"model_name": "llama3.2", "temperature": 0.3},
+    "openai": {"model_name": "gpt-4o-mini", "temperature": 1.0},
+    "hf": {"model_name": "HuggingFaceH4/zephyr-7b-beta", "temperature": 1.0},
+    "aixplain": {"model_id": "640b517694bf816d35a59125", "temperature": 1.0},
 }#.get(provider.lower())
