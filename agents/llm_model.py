@@ -34,7 +34,7 @@ class OllamaModel(ModelBase):
 
 # === OpenAI Model ===
 class OpenAIModel(ModelBase):
-    def __init__(self, model_name: str = "gpt-4", temperature: float = 0.3, api_key: Optional[str] = None):
+    def __init__(self, model_name: str = "gpt-4", temperature: float = 0, api_key: Optional[str] = None):
         from langchain_openai import ChatOpenAI
         openai_key = os.getenv("OPENAI_KEY") or api_key
         self.llm = ChatOpenAI(model=model_name, temperature=temperature, api_key=openai_key)
