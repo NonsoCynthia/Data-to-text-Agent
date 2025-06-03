@@ -22,13 +22,10 @@ class ExecutionState(TypedDict, total=False):  # set total=False to make all key
     """Holds evolving state across agent pipeline execution."""
     user_prompt: Union[Text, Dict[str, Any]]
     raw_data: Union[Text, Dict[str, Any]]
-    execution_plan: List[Dict[str, Any]]
     history_of_steps: List[AgentStepOutput]
-    dialogue_trace: List[Dict[str, Any]]
     next_agent: str
     next_agent_payload: str
     final_response: str
-    agent_output: str
     review: str
     iteration_count: int
     max_iteration: int

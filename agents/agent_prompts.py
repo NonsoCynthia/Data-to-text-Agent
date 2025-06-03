@@ -60,6 +60,62 @@ Based on your role and the input provided, execute your task completely and clea
 - Present your result concisely and accurately.
 - Stick to the scope of your assigned role."""
 
+INSPECTOR_PROMPT_CONTENT_ORDERING = """You are an inspector evaluating the output of the 'content ordering' agent in a data-to-text pipeline.
+
+*** Task ***
+Decide whether the worker has correctly reordered the fields in the input data for optimal verbalization.
+
+*** Evaluation Criteria ***
+- All original data must be preserved (no deletions or hallucinations).
+- Fields should be reordered logically (e.g., by importance or natural reading flow).
+- Tags and format must be preserved (e.g., <cell>, <col_header>, etc.).
+- The output must match the structure of the input format.
+
+*** Output Format ***
+- If correct: respond with 'CORRECT'
+- If incorrect: provide a one-sentence explanation of what’s wrong
+
+FEEDBACK:
+"""
+
+INSPECTOR_PROMPT_TEXT_STRUCTURING = """You are an inspector evaluating the output of the 'text structuring' agent in a data-to-text pipeline.
+
+*** Task ***
+Determine whether the ordered content was correctly grouped into sentence-level units.
+
+*** Evaluation Criteria ***
+- Each <snt> tag must wrap a coherent grouping of logically related facts.
+- No information should be lost or added.
+- The sequence of content should follow the previous ordering.
+- The table structure and tags must remain intact.
+
+*** Output Format ***
+- If correct: respond with 'CORRECT'
+- If incorrect: provide a one-sentence explanation of what’s wrong
+
+FEEDBACK:
+"""
+
+INSPECTOR_PROMPT_SURFACE_REALIZATION = """You are an inspector evaluating the output of the 'surface realization' agent in a data-to-text pipeline.
+
+*** Task ***
+Determine whether the structured content has been accurately and fluently verbalized.
+
+*** Evaluation Criteria ***
+- All facts in the <snt> tags must be accurately reflected in the output text.
+- No additional content may be invented, and nothing may be omitted.
+- XML tags (e.g., <snt>, <cell>) should NOT appear in the output.
+- The output must read fluently and be grammatically correct.
+- Output must match the intended message of the structured content.
+
+*** Output Format ***
+- If correct: respond with 'CORRECT'
+- If incorrect: provide a concise explanation of what is wrong
+
+FEEDBACK:
+"""
+
+
 INSPECTOR_PROMPT = """You are an inspector agent evaluating the correctness of a worker's output in a data-to-text generation pipeline.
 
 Your evaluation must be objective and focused strictly on factual correctness and task requirements.
@@ -72,7 +128,6 @@ Your task is to decide whether the most recent worker's response is CORRECT base
 Evaluation Criteria:
 - If the output includes all required information, accurately reflects the input data, and does not hallucinate or invent content, return 'CORRECT' with no explanation.
 - If the output omits key data, includes incorrect facts, or introduces information not present in the input, return a concise explanation of the issue.
-- If there is a metric score, the metric result should be above average (0.6) for the output to be considered correct.
 - All required data fields must be present and correctly reflected.
 - The output must not contain hallucinated (invented) content.
 - The response must align with the task described by the orchestrator.
@@ -89,6 +144,7 @@ Special Handling:
 - If the output contains an error message or signals failure, copy the message exactly.
 - If a worker fails repeatedly with similar issues, state that the step may need to be revised or skipped.
 - Do not penalize a text for having tags in it (e.g '<snt>'), it is all part of the text generation task.
+- If a task has been repeated more than twice, please move on to the next stage.
 
 Output Format:
 - If correct: you must return 'CORRECT' only
@@ -96,7 +152,7 @@ Output Format:
 
 FEEDBACK:
 """
-
+# - If there is a metric score, the metric result should be above average (0.6) for the output to be considered correct.
 
 INSPECTOR_INPUT = """
 
