@@ -10,7 +10,7 @@ from agents.utilities.agent_utils import apply_variable_substitution
 
 class TaskWorker:
     @classmethod
-    def init(cls, description: Text, tools: List[Any], context: Union[Text, Dict[str, Any]], provider: str = "ollama"):
+    def init(cls, description: Text, tools: List[Any], context: Union[Text, Dict[str, Any]], provider: str = "ollama") -> AgentExecutor:
         params = model_name.get(provider.lower())
         model = UnifiedModel(provider=provider, **params).raw_model()
         desc = apply_variable_substitution(description, context) if description else ""

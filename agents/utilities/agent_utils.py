@@ -1,13 +1,12 @@
 import re
 import torch
 from typing import Dict, List, Text, Any, Union, Optional
-from comet import download_model, load_from_checkpoint
+# from comet import download_model, load_from_checkpoint
 from agents.utilities.utils import ExecutionState, AgentStepOutput, IntermediateToolUsage
 
 # Configure precision
-torch.set_float32_matmul_precision("high")
-
-_comet_instance = None
+# torch.set_float32_matmul_precision("high")
+# _comet_instance = None
 
 def apply_variable_substitution(template: Text, substitutions: Union[Text, Dict[Text, Text]]) -> Text:
     keys = re.findall(r"(?<!{){([^}]+)}(?!})", template)
@@ -57,29 +56,29 @@ def to_result_steps_xml(agent_steps: List[AgentStepOutput]) -> str:
     xml_output.append("</result_steps>")
     return "\n".join(xml_output)
 
-def score_comet_quality(source_text: str, prediction_text: str, use_gpu=False):
-    global _comet_instance
+# def score_comet_quality(source_text: str, prediction_text: str, use_gpu=False):
+#     global _comet_instance
 
-    if _comet_instance is None:
-        model_path = download_model("Unbabel/wmt22-cometkiwi-da")
-        _comet_instance = load_from_checkpoint(model_path)
+#     if _comet_instance is None:
+#         model_path = download_model("Unbabel/wmt22-cometkiwi-da")
+#         _comet_instance = load_from_checkpoint(model_path)
 
-    torch.cuda.empty_cache()
-    run_on_gpu = 1 if use_gpu and torch.cuda.is_available() else 0
+#     torch.cuda.empty_cache()
+#     run_on_gpu = 1 if use_gpu and torch.cuda.is_available() else 0
 
-    source = str(source_text).strip()
-    mt = str(prediction_text).strip()
+#     source = str(source_text).strip()
+#     mt = str(prediction_text).strip()
 
-    try:
-        result = _comet_instance.predict(
-            [{'src': source, 'mt': mt}],
-            gpus=run_on_gpu,
-            num_workers=1  # avoids multiprocessing_context error
-        )
-        return f"Metric Evaluation Result: {round(result.system_score, 3)}"
-    except Exception as e:
-        print(f"Metric Evaluation Result: Metric Evaluation Failed: {e}")
-        return ""
+#     try:
+#         result = _comet_instance.predict(
+#             [{'src': source, 'mt': mt}],
+#             gpus=run_on_gpu,
+#             num_workers=1  # avoids multiprocessing_context error
+#         )
+#         return f"Metric Evaluation Result: {round(result.system_score, 3)}"
+#     except Exception as e:
+#         print(f"Metric Evaluation Result: Metric Evaluation Failed: {e}")
+#         return ""
 
 
 def find_validated_agents(step_trace: List[AgentStepOutput]) -> set:
