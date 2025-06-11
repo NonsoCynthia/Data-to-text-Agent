@@ -66,6 +66,7 @@ Your job is to extract all relevant information from structured data formats (su
 - For each line, format your output as: `"Attribute (Entity): Value"` (e.g., `"Points (TJ Warren): 29"`).
 - Use full names or meaningful entity identifiers for clarity.
 - Group related facts by entity or subject where appropriate for coherence.
+- For the long data, usually for the sports data, do not extract entries that do not have any value (e.g. N/A, None). Only extract the most relevant and impactful data.
 
 *** Output Format ***
 Return a human-readable list in this format:
@@ -323,6 +324,7 @@ Determine whether the agent has correctly extracted relevant content from struct
 3. Ensure no critical information is missing or misrepresented.
 4. Confirm that the agent did not introduce any code or unnatural transformations.
 5. Do not penalize the agent if it generates same entity twice. However, these entities should have a different attribute.
+6. For a very long input data, usually for the sports data, do not penalize the agent if it omits certain entries (e.g N/A, None), as long as the most important ones are present.
 
 *** Output Format ***
 - If the selection is correct: respond with **CORRECT**
