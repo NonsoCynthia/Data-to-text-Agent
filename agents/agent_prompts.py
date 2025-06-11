@@ -236,6 +236,7 @@ You will receive:
 *** Instructions ***
 - Convert each <snt> block into one complete, fluent sentence.
 - If <paragraph> tags are present, convert the enclosed <snt> groups into a paragraph with smoothly flowing sentences.
+- You must respect the <snt> and <paragraph> level structure in the generation, but do not include these tags in your final output.
 - Do not hallucinate, rephrase, or omit any factual information.
 - Do not include any tag markers (<snt>, <paragraph>, etc.) in your output.
 - Your output should read naturally, like a human-written paragraph or series of sentences, depending on the structure.
@@ -348,6 +349,7 @@ Your job is to verify whether the worker has correctly **reordered the fields** 
 2. Verify that the same elements are present, but possibly in a different order.
 3. Ensure that no hallucinated content or rephrasing has been introduced.
 4. Only on rare occasion should the order of the facts may remain the same.
+5. For a very long input data, usually for the sports data, do not penalize the agent strictly on the ordering of facts. 
 
 *** Output Format ***
 - If everything is correct, respond with: **CORRECT**
