@@ -1,60 +1,95 @@
 import re
-import torch
-from typing import Dict, List, Text, Any, Union, Optional
-# from comet import download_model, load_from_checkpoint
-from agents.utilities.utils import ExecutionState, AgentStepOutput, IntermediateToolUsage
-
-# Configure precision
-# torch.set_float32_matmul_precision("high")
-# _comet_instance = None
+from typing import List, Text, Union, Dict
+from agents.utilities.utils import AgentStepOutput
 
 def apply_variable_substitution(template: Text, substitutions: Union[Text, Dict[Text, Text]]) -> Text:
-    keys = re.findall(r"(?<!{){([^}]+)}(?!})", template)
+    """
+    Substitute placeholders in the form {variable} within a template string.
+
+    Args:
+        template (Text): A string containing placeholders.
+        substitutions (Union[Text, Dict[Text, Text]]): Substitution values.
+
+    Returns:
+        Text: The formatted string with placeholders replaced.
+    """
     if isinstance(substitutions, str):
-        return template
-    for key in keys:
-        template = template.replace(f"{{{key}}}", substitutions.get(key, ""))
+        return template  # no substitution possible with plain string
+
+    pattern = re.compile(r"(?<!{){([^{}]+)}(?!})")
+    for match in pattern.findall(template):
+        template = template.replace(f"{{{match}}}", substitutions.get(match, ""))
     return template
 
 def summarize_agent_steps(step_log: List[AgentStepOutput]) -> List[Text]:
-    summary, idx = [], 0
-    for entry in [s for s in step_log if s.agent_name not in ["planner", "inspector"]]:
-        if entry.agent_name == "orchestrator":
+    """
+    Generate a uniquely formatted summary of agent execution steps,
+    excluding guardrail steps and using UID-tagged blocks.
+
+    Args:
+        step_log (List[AgentStepOutput]): List of agent interaction records.
+
+    Returns:
+        List[Text]: A list of UID-formatted step summaries.
+    """
+    summary = []
+    step_counter = 1
+
+    for entry in step_log:
+        agent = entry.agent_name.lower()
+
+        if agent == "guardrail":
+            continue
+
+        if agent == "orchestrator":
             try:
-                role, input_payload = re.findall(r"(.*)\(input='(.*)'\)", entry.agent_output)[0]
+                role, role_input = re.findall(r"(.*)\(input='(.*)'\)", entry.agent_output)[0]
             except Exception:
-                role, input_payload = "", ""
+                role, role_input = "FINISH", entry.agent_output
+
+            agent_type = "orchestrator"
+            uid = f"{agent_type.upper()}_{step_counter}"
             if role == "FINISH":
-                summary.append(
-                    f"***STEP {idx+1}:***\nAGENT: orchestrator\nRESPONSE:\n'{input_payload}'\n--------------------"
+                block = (
+                    f"##=== BEGIN:{uid} ===##\n"
+                    f"-- AGENT TYPE: {agent_type}\n"
+                    f"-- AGENT NAME: {entry.agent_name}\n"
+                    f"-- SIGNAL: FINISH\n"
+                    f"-- RESPONSE START --\n{role_input}\n-- RESPONSE END --\n"
+                    f"##=== END:{uid} ===##"
                 )
-                idx += 1
+            else:
+                block = (
+                    f"##=== BEGIN:{uid} ===##\n"
+                    f"-- AGENT TYPE: {agent_type}\n"
+                    f"-- AGENT NAME: {entry.agent_name}\n"
+                    f"-- ROUTED TO: {role}\n"
+                    f"-- INPUT START --\n{role_input}\n-- INPUT END --\n"
+                    f"##=== END:{uid} ===##"
+                )
+
         else:
-            summary.append(
-                f"***STEP {idx+1}:***\nAGENT: {entry.agent_name}\nINPUT:\n'{entry.agent_input}'\nRESPONSE:\n'{entry.agent_output}'\n--------------------"
+            agent_type = "worker"
+            uid = f"{agent_type.upper()}_{step_counter}"
+            block = (
+                f"##=== BEGIN:{uid} ===##\n"
+                f"-- AGENT TYPE: {agent_type}\n"
+                f"-- AGENT NAME: {entry.agent_name}\n"
+                f"-- INPUT START --\n{entry.agent_input}\n-- INPUT END --\n"
+                f"-- OUTPUT START --\n{entry.agent_output}\n-- OUTPUT END --\n"
+                f"##=== END:{uid} ===##"
             )
-            idx += 1
+
+        summary.append(block)
+        step_counter += 1
+
     return summary
 
-def to_result_steps_xml(agent_steps: List[AgentStepOutput]) -> str:
-    if not agent_steps:
-        return "<result_steps></result_steps>"
-    filtered = [step for step in agent_steps if all(x not in step.agent_name for x in ["planner", "orchestrator", "inspector"])]
-    xml_output = ["<result_steps>"]
-    for count, step in enumerate(filtered, 1):
-        user_input = str(step.agent_input or "")
-        if user_input.startswith("Task:"):
-            user_input = user_input.replace("Task:", "").split("\n\n")[0].strip()
-        agent_response = str(step.agent_output or "")
-        xml_output += [
-            f'    <step number="{count}">',
-            f"        <agent>{step.agent_name}</agent>",
-            f"        <input>{user_input}</input>",
-            f"        <response>{agent_response}</response>",
-            "    </step>"
-        ]
-    xml_output.append("</result_steps>")
-    return "\n".join(xml_output)
+# import torch
+# from comet import download_model, load_from_checkpoint
+# Configure precision
+# torch.set_float32_matmul_precision("high")
+# _comet_instance = None
 
 # def score_comet_quality(source_text: str, prediction_text: str, use_gpu=False):
 #     global _comet_instance
@@ -81,13 +116,3 @@ def to_result_steps_xml(agent_steps: List[AgentStepOutput]) -> str:
 #         return ""
 
 
-def find_validated_agents(step_trace: List[AgentStepOutput]) -> set:
-    verified = set()
-    for i, step in enumerate(step_trace):
-        if step.agent_name == "inspector" and str(step.agent_output).strip().upper() == "CORRECT":
-            for j in range(i - 1, -1, -1):
-                prior = step_trace[j]
-                if prior.agent_name not in ["inspector", "orchestrator", "planner"]:
-                    verified.add(prior.agent_name.lower())
-                    break
-    return verified

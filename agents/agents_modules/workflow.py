@@ -5,11 +5,9 @@ from agents.agents_modules.orchestrator import TaskOrchestrator
 from agents.agents_modules.worker import TaskWorker
 from agents.agents_modules.guardrail import TaskGuardrail
 from agents.agents_modules.finalizer import TaskFinalizer
-from agents.agent_prompts import (CONTENT_SELECTION_PROMPT,
-                                  CONTENT_ORDERING_PROMPT, 
-                                  TEXT_STRUCTURING_PROMPT, 
-                                  SURFACE_REALIZATION_PROMPT
-                                  )
+from agents.agent_prompts import (CONTENT_SELECTION_PROMPT, CONTENT_ORDERING_PROMPT, 
+                                  TEXT_STRUCTURING_PROMPT, SURFACE_REALIZATION_PROMPT)
+
 
 WORKER_ROLES = {
     "content selection": CONTENT_SELECTION_PROMPT,
@@ -27,7 +25,10 @@ def add_workers(worker_prompts: Dict[str, str], graph: StateGraph, tools: List[A
     return added
 
 def guardrail_routing(state: ExecutionState) -> Literal["orchestrator", "finalizer"]:
-    expected = {"content selection", "content ordering", "text structuring", "surface realization"}
+    expected = {"content selection", 
+                "content ordering", 
+                "text structuring", 
+                "surface realization"}
     done = {step.agent_name.lower() for step in state.get("history_of_steps", []) if step.agent_name.lower() in expected}
     return "finalizer" if expected.issubset(done) and "correct" in state.get("review", "").lower() else "orchestrator"
 
@@ -51,7 +52,7 @@ def build_agent_workflow(provider: str = "ollama") -> StateGraph:
 
     # Routing
     routes = {name: name for name in workers}
-    routes.update({"guardrail": "guardrail", "FINISH": "finalizer"})
+    routes.update({"FINISH": "finalizer"})
     flow.add_conditional_edges("orchestrator", lambda state: state["next_agent"], routes)
     for w in workers:
         flow.add_edge(w, "guardrail")

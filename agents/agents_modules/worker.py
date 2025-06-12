@@ -4,21 +4,24 @@ from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
 from langgraph.errors import GraphRecursionError
 from agents.utilities.utils import ExecutionState, AgentStepOutput
 from agents.llm_model import UnifiedModel, model_name
-from agents.agent_prompts import AGENT_SYSTEM_PROMPT, AGENT_HUMAN_PROMPT
+from agents.agent_prompts import WORKER_SYSTEM_PROMPT, WORKER_HUMAN_PROMPT
 from agents.utilities.agent_utils import apply_variable_substitution
 
 
 class TaskWorker:
     @classmethod
     def init(cls, description: Text, tools: List[Any], context: Union[Text, Dict[str, Any]], provider: str = "ollama") -> AgentExecutor:
+
         params = model_name.get(provider.lower())
         model = UnifiedModel(provider=provider, **params).raw_model()
         desc = apply_variable_substitution(description, context) if description else ""
+
         prompt = ChatPromptTemplate.from_messages([
-            ("system", f"AGENT DESCRIPTION:\n{desc}\n\nPROMPT:\n{AGENT_SYSTEM_PROMPT}" if desc else AGENT_SYSTEM_PROMPT),
+            ("system", f"AGENT DESCRIPTION:\n{desc}\n\nEXECUTION INSTRUCTION:\n{WORKER_SYSTEM_PROMPT}" if desc else WORKER_SYSTEM_PROMPT),
             MessagesPlaceholder(variable_name="chat_history", optional=True),
-            ("human", AGENT_HUMAN_PROMPT),
+            ("human", WORKER_HUMAN_PROMPT),
         ]).partial(output_format="text")
+        
         return AgentExecutor(
             agent=create_json_chat_agent(model, tools, prompt),
             tools=tools,

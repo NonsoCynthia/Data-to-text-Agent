@@ -30,7 +30,7 @@ class TaskOrchestrator:
 
             trace = "\n".join([f"{m['role'].upper()}: {m['content']}" for m in state.get("dialogue_trace", [])])
             prompt = f"{trace}\nUSER: {state.get('user_prompt', '')}"
-            feedback = f"\n{prompt}\nFEEDBACK: {state['review']}" if state.get("review") else ""
+            feedback = f"\n{prompt}\nFEEDBACK: {state.get('review', '')}"
             summary = "\n\n".join(summarize_agent_steps(history))
 
             payload = ORCHESTRATOR_INPUT.format(
@@ -55,7 +55,7 @@ class TaskOrchestrator:
                 rationale, role, role_input = re.findall(r"Thought:\s*(.*?)\s*Worker:\s*(.*?)\s*Worker Input:\s*(.*)", output, re.DOTALL)[0]
             except Exception:
                 rationale, role, role_input = "parse error", "FINISH", output
-            role = role.strip("'\"")
+            role = role.lower().strip("'\"")
             history.append(AgentStepOutput(
                 agent_name="orchestrator",
                 agent_input=payload,

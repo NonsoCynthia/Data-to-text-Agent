@@ -1,4 +1,5 @@
 # https://smith.langchain.com/hub/hwchase17/react
+# https://smith.langchain.com/hub/hwchase17/react-json agent_human_prompt
 # https://smith.langchain.com/hub
 
 # - Sports summaries (e.g., Rotowire, MLB, Turku Hockey, Basketball),
@@ -183,6 +184,7 @@ You will receive a flat list of attribute-value strings, each formatted as:
 - Keep each entry strictly in the format: "Attribute (Entity): Value".
 - Prefer grouping related facts under the same entity.
 - Within each group, order facts from general/background (e.g., team, position) to detailed performance or event-specific facts (e.g., points, assists).
+- Also consider the instructions from the user if any.
 
 *** Output Format ***
 Return a reordered list of the input strings, preserving the exact original format: "Attribute (Entity): Value".
@@ -206,7 +208,11 @@ You will receive a list of strings in the format:
 - Do not delete, rephrase, hallucinate, or change any content.
 - Do not modify the format of individual facts—only organize them with tags.
 - Prefer grouping facts under the same entity and follow the natural flow of how such information would be conveyed in writing.
-- Maintain one <snt> block per logical sentence and one <paragraph> block per thematically related sentence group.
+- Maintain one <snt> block per logical sentence and one <paragraph> block per thematically related group of sentences.
+- For long-form text, use 1–3 <paragraph> blocks. For short text, use 1 paragraph only.
+- Within each paragraph, must include multiple sentences enclosed in <snt> tags.
+- Also consider the instructions from the user if any.
+ 
 
 *** Output Format ***
 Return the list of original strings organized with nested structure, like:
@@ -214,13 +220,29 @@ Return the list of original strings organized with nested structure, like:
 <paragraph>
 <snt>
 Attribute (Entity): Value  
-Attribute (Entity): Value  
+Attribute (Entity): Value
+... 
 </snt>
 <snt>
 Attribute (Entity): Value  
-Attribute (Entity): Value  
+Attribute (Entity): Value
+... 
 </snt>
 </paragraph>
+
+<paragraph>
+<snt>
+Attribute (Entity): Value  
+Attribute (Entity): Value
+... 
+</snt>
+<snt>
+Attribute (Entity): Value  
+Attribute (Entity): Value
+... 
+</snt>
+</paragraph>
+
 """
 
 SURFACE_REALIZATION_PROMPT = """You are the 'surface realization' agent in a structured data-to-text pipeline.
@@ -237,10 +259,14 @@ You will receive:
 - Convert each <snt> block into one complete, fluent sentence.
 - If <paragraph> tags are present, convert the enclosed <snt> groups into a paragraph with smoothly flowing sentences.
 - You must respect the <snt> and <paragraph> level structure in the generation, but do not include these tags in your final output.
+- Make sure to mention all the entities, referring expressions (names, people, places, things, etc) and their corresponding attributes. Do not omit any important information.
 - Do not hallucinate, rephrase, or omit any factual information.
 - Do not include any tag markers (<snt>, <paragraph>, etc.) in your output.
 - Your output should read naturally, like a human-written paragraph or series of sentences, depending on the structure.
 - Do not mention the page titles and sections. Please focus on the entities and their attributes.
+- Avoid repetition of information across sentences.
+- Also consider the instructions from the user if any.
+
 
 *** Output Format ***
 - If <paragraph> is present: return one natural language paragraph per <paragraph> block.
@@ -248,7 +274,9 @@ You will receive:
 - Ensure grammatical correctness, fluency, and factual faithfulness.
 """
 
-AGENT_SYSTEM_PROMPT = """Respond to the human as helpfully and accurately as possible. You have access to the following tools:
+# https://smith.langchain.com/hub/hwchase17/react-json
+# https://smith.langchain.com/hub/hwchase17/structured-chat-agent
+WORKER_SYSTEM_PROMPT = """Respond to the human as helpfully and accurately as possible. You have access to the following tools:
 
 {tools}
 
@@ -291,10 +319,11 @@ Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observati
 
 
 
-AGENT_HUMAN_PROMPT = """{input}
+WORKER_HUMAN_PROMPT = """{input}
 
 {agent_scratchpad}
  (reminder to respond in a JSON blob no matter what)"""
+ 
 
 WORKER_PROMPT = """You are a specialized agent assigned to perform a specific roles:
 

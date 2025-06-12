@@ -2,6 +2,8 @@ import nltk
 # nltk.download('all')
 import torch
 from nltk.tokenize import word_tokenize
+from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+smoother = SmoothingFunction()
 from nltk.translate.meteor_score import single_meteor_score
 from rouge_score import rouge_scorer
 import sacrebleu
@@ -45,12 +47,12 @@ def evaluate_single(references, prediction, sources=None) -> dict:
     sources = ensure_list(sources) if sources is not None else references
 
     # BLEU (supports multiple references)
-    bleu = sacrebleu.raw_corpus_bleu([prediction], [references], 0.01).score
+    bleu = sacrebleu.raw_corpus_bleu([prediction], [[ref] for ref in references]).score/100
+    # bleu = sentence_bleu([word_tokenize(ref) for ref in references], word_tokenize(prediction), smoothing_function=smoother.method1)
 
     # METEOR (only one reference supported)
-    meteor = single_meteor_score(
-        word_tokenize(references[0]), word_tokenize(prediction)
-    )
+    meteor = single_meteor_score(word_tokenize(references[0]), word_tokenize(prediction))
+
 
     # ROUGE (using only the first reference)
     rouge_scorer_obj = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
@@ -59,11 +61,19 @@ def evaluate_single(references, prediction, sources=None) -> dict:
 
     # COMET (evaluate using the first source and reference)
     comet_input = [{"src": sources[0], "mt": prediction, "ref": references[0]}]
-    comet_score = comet_model.predict(comet_input, gpus=0)[0][0]
+    use_gpu = torch.cuda.is_available()
+    comet_score = comet_model.predict(comet_input, gpus=1 if use_gpu else 0)[0][0]
 
     # BLEURT (evaluate using the first reference)
     with torch.no_grad():
-        inputs = bleurt_tokenizer(references[0], prediction, return_tensors='pt', padding=True)
+        inputs = bleurt_tokenizer(
+            references[0],
+            prediction,
+            return_tensors='pt',
+            padding=True,
+            truncation=True,  # ✅ truncate to max length
+            max_length=512).to(bleurt_model.device)
+
         bleurt_output = bleurt_model(**inputs).logits.flatten().item()
 
     # BERTScore (supports multiple references)
