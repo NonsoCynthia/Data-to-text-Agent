@@ -52,7 +52,7 @@ def build_agent_workflow(provider: str = "ollama") -> StateGraph:
 
     # Routing
     routes = {name: name for name in workers}
-    routes.update({"FINISH": "finalizer"})
+    routes.update({"finish": "finalizer"})
     flow.add_conditional_edges("orchestrator", lambda state: state["next_agent"], routes)
     for w in workers:
         flow.add_edge(w, "guardrail")

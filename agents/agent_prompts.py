@@ -55,7 +55,7 @@ ASSIGNMENT:
 CONTENT_SELECTION_PROMPT = """You are the 'content selection' agent in a structured data-to-text pipeline.
 
 *** Task ***
-Your job is to extract all relevant information from structured data formats (such as XML, tables, or JSON records) and convert them into a clean, human-readable list of statements.
+Your job is to extract all relevant information from structured data formats (such as XML, tables, or JSON records) and convert them into a clean, human-readable list of statements. You also determine the information to be mentioned in the final text.
 
 *** Instructions ***
 - Use only your **reasoning and natural understanding** of the input. You must **not** use or simulate any programming code.
@@ -129,7 +129,7 @@ Return a human-readable list in this format:
   "Home Runs (Manuel Margot): 1",
   "RBIs (Manuel Margot): 5",
   "Innings Pitched (Chase Anderson): 4 2/3",
-  "Runs Allowed (Chase Anderson): 4",
+  "Runs Allowed (Chase Anderson): 4",tence is
   "Strikeouts (Chase Anderson): 4",
   "Innings Pitched (Clayton Richard): 5",
   "Runs Allowed (Clayton Richard): 5",
@@ -171,7 +171,7 @@ Return a human-readable list in this format:
 CONTENT_ORDERING_PROMPT = """You are the 'content ordering' agent in a structured data-to-text pipeline.
 
 *** Task ***
-Your job is to reorder a list of extracted facts so that they reflect the most natural and coherent flow for verbalizing the final text.
+Your job is to reorder a list of extracted facts so that they reflect the most natural and coherent flow for verbalizing the final text. You arrange information in the input in their most appropriate sequences in the final text.
 
 *** Input Format ***
 You will receive a flat list of attribute-value strings, each formatted as:
@@ -194,7 +194,7 @@ Return a reordered list of the input strings, preserving the exact original form
 TEXT_STRUCTURING_PROMPT = """You are the 'text structuring' agent in a structured data-to-text pipeline.
 
 *** Task ***
-Your job is to group a list of ordered facts into coherent sentence-level and paragraph-level units that reflect how the final text should be verbalized.
+Your job is to group a list of ordered facts into coherent sentence-level and paragraph-level units that reflect how the final text should be verbalized. You organise the information into separate sentences and paragraphs, using <snt> and <paragraph> tags.
 
 *** Input Format ***
 You will receive a list of strings in the format:
@@ -248,7 +248,7 @@ Attribute (Entity): Value
 SURFACE_REALIZATION_PROMPT = """You are the 'surface realization' agent in a structured data-to-text pipeline.
 
 *** Task ***
-Your job is to convert structured content—grouped using <snt> and <paragraph> tags—into fluent, grammatical, and natural-sounding text.
+Your job is to convert structured content—grouped using <snt> and <paragraph> tags—into fluent, grammatical, and natural-sounding text. You combine the output of all the previous steps toward generating a complete text. 
 
 *** Input Format ***
 You will receive:
@@ -432,52 +432,68 @@ Determine whether the structured content has been accurately and fluently verbal
 FEEDBACK:
 """
 
-GUARDRAIL_PROMPT_FLUENCY_GRAMMAR = """You are an guardrail focused on evaluating the **fluency** and **grammatical correctness** of a generated text.
+GUARDRAIL_PROMPT_FLUENCY_GRAMMAR = """You are a guardrail focused on evaluating the **fluency** and **grammatical correctness** of a generated text in a data-to-text generation pipeline. You will receive a complete paragraph level or sentence level generated text for evalauation.
+
+*** Definitions ***
+- **Fluency** refers to how smoothly and naturally the output reads. A fluent sentence has appropriate word choice, sentence rhythm, and no awkward or choppy phrasing.
+- **Grammaticality** refers to the correctness of language according to standard grammar rules, including subject-verb agreement, tense consistency, punctuation, and syntactic structure.
 
 *** Task ***
-Determine whether the output is readable and well-formed.
+Determine whether the generated output is readable, well-formed, and free of grammatical issues.
 
 *** Evaluation Criteria ***
-- **Fluency**: The output should read naturally, without awkward phrasing or unnatural word combinations.
-- **Grammaticality**: The text must follow grammar rules (e.g., verb tense, subject-verb agreement, punctuation).
+- **Fluency**: Sentences should read naturally and avoid awkward constructions or unnatural collocations.
+- **Grammaticality**: The text must be grammatically correct according to formal written English norms.
 
 *** Output Format ***
 - If both criteria are met: respond with 'CORRECT'
-- If either is violated: return a concise one-sentence specific explanation
+- If either is violated: return a concise one-sentence specific explanation.
 
 FEEDBACK:
 """
 
-GUARDRAIL_PROMPT_FAITHFUL_ADEQUACY = """You are an guardrail focused on evaluating **faithfulness** to the input data and the **adequacy** of the output content.
+
+GUARDRAIL_PROMPT_FAITHFUL_ADEQUACY = """You are a guardrail focused on evaluating **faithfulness** to the input data and the **adequacy** of the output content in a data-to-text generation task. You will receive a complete paragraph level or sentence level generated text for evalauation.
+
+*** Definitions ***
+- **Faithfulness** means that the output must remain factually accurate and reflect only the information present in the input. No fabricated, altered, or hallucinated information is allowed.
+- **Adequacy** means that the output must include all the critical and salient facts from the input data. It should not omit important content necessary for understanding the data.
 
 *** Task ***
-Verify that the output remains true to the data and includes all necessary details.
+Verify that the output is strictly derived from the input and comprehensively conveys its key information.
 
 *** Evaluation Criteria ***
-- **Faithfulness**: No fabricated or hallucinated content; all facts in the output must come from the input.
-- **Adequacy**: The output must cover all critical information present in the input without omission.
+- **Faithfulness**: Every statement in the output must be traceable to the input data.
+- **Adequacy**: All major data points should be present; the text should not skip or ignore essential facts.
 
 *** Output Format ***
 - If both criteria are satisfied: respond with 'CORRECT'
-- If either is violated: return a concise one-sentence specific explanation
+- If either is violated: return a concise one-sentence specific explanation.
+
 FEEDBACK:
 """
 
-GUARDRAIL_PROMPT_COHERENT_NATURAL = """You are an guardrail evaluating whether the generated text is **coherent** and **natural** in tone and structure.
+
+GUARDRAIL_PROMPT_COHERENT_NATURAL = """You are a guardrail evaluating whether the generated text is **coherent** and **natural** in a data-to-text generation task. You will receive a complete paragraph level or sentence level generated text for evalauation.
+
+*** Definitions ***
+- **Coherence** refers to how well the ideas and facts in the text are organized and connected. A coherent output has a logical structure and clear flow, even when multiple data points are presented.
+- **Naturalness** refers to whether the output sounds like it was written by a human. It should avoid stilted, robotic, or overly templated language.
 
 *** Task ***
-Determine if the content flows logically and sounds like it was written by a human.
+Assess whether the text presents the information in a clear, logically connected manner and reads as if authored by a human.
 
 *** Evaluation Criteria ***
-- **Coherence**: The ordering and flow of ideas must be logical and easy to follow.
-- **Naturalness**: The text should sound human-written in tone and style — no robotic or template-like expressions.
+- **Coherence**: Sentences should connect well; transitions between ideas must make sense.
+- **Naturalness**: The phrasing should resemble that of human writing, not mechanical output.
 
 *** Output Format ***
 - If both criteria are met: respond with 'CORRECT'
-- If either is violated: return a concise one-sentence specific explanation
+- If either is violated: return a concise one-sentence specific explanation.
 
 FEEDBACK:
 """
+
 
 GUARDRAIL_PROMPT = """You are an guardrail agent evaluating the correctness of a worker's output in a data-to-text generation pipeline.
 
