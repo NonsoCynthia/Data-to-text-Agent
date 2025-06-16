@@ -76,17 +76,24 @@ class TaskGuardrail:
                 faith_result = faithful_guard.invoke({"input": prompt}).content.strip().split("FEEDBACK:")[-1].strip()
                 coherence_result = coherence_guard.invoke({"input": prompt}).content.strip().split("FEEDBACK:")[-1].strip()
 
-                print(f"GUARDRAIL (fluency_grammar): {fluency_result}")
-                print(f"GUARDRAIL (faith_adequacy): {faith_result}")
-                print(f"GUARDRAIL (coherent_natural): {coherence_result}")
+                # Construct structured review message
+                review_message = (
+                    "=== GUARDRAIL REVIEW (surface realization) ===\n"
+                    f"[Fluency & Grammar]\n{fluency_result}\n\n"
+                    f"[Faithfulness & Adequacy]\n{faith_result}\n\n"
+                    f"[Coherence & Naturalness]\n{coherence_result}\n\n"
+                    f"OVERALL: {'CORRECT' if all(r.upper() == 'CORRECT' for r in [fluency_result, faith_result, coherence_result]) else 'Rerun with feedback'}"
+                )
 
-                individual_results = {
-                    "fluency_grammar": fluency_result,
-                    "faith_adequacy": faith_result,
-                    "coherent_natural": coherence_result,
-                }
-                incorrect = {k: v for k, v in individual_results.items() if v.upper() != "CORRECT"}
-                final_verdict = "CORRECT" if not incorrect else " | ".join([f"{k}: {v}" for k, v in incorrect.items()])
+                final_verdict = review_message
+
+                # individual_results = {
+                #     "fluency_grammar": fluency_result,
+                #     "faith_adequacy": faith_result,
+                #     "coherent_natural": coherence_result,
+                # }
+                # incorrect = {k: v for k, v in individual_results.items() if v.upper() != "CORRECT"}
+                # final_verdict = "CORRECT" if not incorrect else " | ".join([f"{k}: {v}" for k, v in incorrect.items()])
 
             elif task == "content selection":
                 conf = model_name.get(cls.provider)
