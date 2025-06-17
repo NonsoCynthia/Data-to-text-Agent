@@ -1,18 +1,29 @@
 import os
+import json
 import argparse
 from tqdm import tqdm
-from datetime import datetime
 from agents.agents_modules.workflow import build_agent_workflow
 from agents.dataloader import load_dataset_by_name, extract_example
 
 # === CLI Arguments ===
 parser = argparse.ArgumentParser()
-parser.add_argument("--model_provider", required=True, help="Model provider (e.g., openai, ollama, hf, aixplain)")
-parser.add_argument("--name", required=True, help="Dataset name (e.g., webnlg)")
-parser.add_argument("--split", default="test", help="Dataset split (e.g., test)")
-parser.add_argument("--output_file", required=True, help="Path to save all predictions (.txt)")
-parser.add_argument("--max_iteration", required=True, help="Agent max iteration count (e.g., 60)")
+parser.add_argument("--model_provider", required=True)
+parser.add_argument("--name", required=True)
+parser.add_argument("--split", default="test")
+parser.add_argument("--output_file", required=True)
+parser.add_argument("--max_iteration", type=int, default=60)
 args = parser.parse_args()
+
+# === Load Existing Indices (if any) ===
+completed_indices = set()
+if os.path.exists(args.output_file):
+    with open(args.output_file, "r") as f:
+        for line in f:
+            try:
+                record = json.loads(line)
+                completed_indices.add(record["index"])
+            except json.JSONDecodeError:
+                continue  # skip corrupted lines
 
 # === Initialize Agent Workflow ===
 process_flow = build_agent_workflow(provider=args.model_provider)
@@ -21,12 +32,18 @@ process_flow = build_agent_workflow(provider=args.model_provider)
 data = load_dataset_by_name(args.name)
 dataset = data[args.split]
 print(f"Loaded {len(dataset)} examples from '{args.name}' [{args.split}]")
+print(f"Skipping {len(completed_indices)} already processed samples")
 
-# === Generate and Save Predictions ===
-with open(args.output_file, "w") as f:
-    for i in tqdm(range(len(dataset)), desc=f"Generating predictions for {args.name}"):
+# === Run and Append Only Unseen Predictions ===
+with open(args.output_file, "a") as f:
+    for i in tqdm(range(len(dataset)), desc=f"Resumable run for {args.name}"):
+        if i in completed_indices:
+            continue
+
         sample = extract_example(args.name, dataset[i])
         input_data = sample.get("input", "")
+        references = sample.get("references", [])
+        target = sample.get("target", "")
 
         query = f"""You are an agent designed to generate text from data for a data-to-text natural language generation.
 You may be provided data in XML, table, meaning representation, or graph format.
@@ -50,15 +67,18 @@ Here is the data:
         }
 
         try:
-            result = process_flow.invoke(state, config={"recursion_limit": 60})
+            result = process_flow.invoke(state, config={"recursion_limit": args.max_iteration})
+            prediction = result.get("final_response", "").strip()
         except Exception as e1:
-            print(f"Attempt 1 failed at index {i}: {e1}")
-            try:
-                result = process_flow.invoke(state, config={"recursion_limit": 60})
-            except Exception as e2:
-                print(f"Attempt 2 failed at index {i}: {e2}")
-                f.write("[ERROR]\n")
-                continue
+            print(f"Failed at index {i}: {e1}")
+            prediction = "[ERROR]"
 
-        prediction = result.get("final_response", "").strip()
-        f.write(prediction + "\n")
+        output = {
+            "index": i,
+            "input": input_data,
+            "prediction": prediction,
+            "references": references,
+            "target": target
+        }
+
+        f.write(json.dumps(output) + "\n")
