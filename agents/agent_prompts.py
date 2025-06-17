@@ -102,7 +102,7 @@ Worker Input: (If 'FINISH' or 'finalizer', provide a final answer. Otherwise, pr
 
 ORCHESTRATOR_INPUT = """USER REQUEST: {input}
 
-INTERMEDIATE STEPS: {result_steps}
+{result_steps}
 
 {feedback}
 

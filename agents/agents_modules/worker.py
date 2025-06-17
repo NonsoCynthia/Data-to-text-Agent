@@ -14,10 +14,10 @@ class TaskWorker:
 
         params = model_name.get(provider.lower())
         model = UnifiedModel(provider=provider, **params).raw_model()
-        desc = apply_variable_substitution(description, context) if description else ""
+        agent_description = apply_variable_substitution(description, context) if description else ""
 
         prompt = ChatPromptTemplate.from_messages([
-            ("system", f"AGENT DESCRIPTION:\n{desc}\n\nEXECUTION INSTRUCTION:\n{WORKER_SYSTEM_PROMPT}" if desc else WORKER_SYSTEM_PROMPT),
+            ("system", f"AGENT DESCRIPTION:\n{agent_description}\n\nEXECUTION INSTRUCTION:\n{WORKER_SYSTEM_PROMPT}"),
             MessagesPlaceholder(variable_name="chat_history", optional=True),
             ("human", WORKER_HUMAN_PROMPT),
         ]).partial(output_format="text")

@@ -82,18 +82,11 @@ class TaskGuardrail:
                     f"[Fluency & Grammar]: {fluency_result}\n"
                     f"[Faithfulness & Adequacy]: {faith_result}\n"
                     f"[Coherence & Naturalness]: {coherence_result}\n"
-                    f"OVERALL: {'CORRECT' if all(r.upper() == 'CORRECT' for r in [fluency_result, faith_result, coherence_result]) else 'Rerun with feedback'}"
+                    f"OVERALL: {'CORRECT' if all(r.upper() == 'CORRECT' for r in [fluency_result, faith_result, coherence_result]) else f'Rerun {task} with feedback'}"
                 )
 
                 final_verdict = review_message
 
-                # individual_results = {
-                #     "fluency_grammar": fluency_result,
-                #     "faith_adequacy": faith_result,
-                #     "coherent_natural": coherence_result,
-                # }
-                # incorrect = {k: v for k, v in individual_results.items() if v.upper() != "CORRECT"}
-                # final_verdict = "CORRECT" if not incorrect else " | ".join([f"{k}: {v}" for k, v in incorrect.items()])
 
             elif task == "content selection":
                 conf = model_name.get(cls.provider)
