@@ -51,5 +51,8 @@ class TaskWorker:
                 rationale=text,
                 tool_steps=tools
             ))
-            return {"history_of_steps": history, "iteration_count": idx + 1}
+            return {"next_agent": "guardrail",
+                    "history_of_steps": history, 
+                    "iteration_count": idx + 1
+                    }
         return run

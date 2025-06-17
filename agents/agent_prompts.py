@@ -1,13 +1,67 @@
 # https://smith.langchain.com/hub/hwchase17/react
 # https://smith.langchain.com/hub/hwchase17/react-json agent_human_prompt
 # https://smith.langchain.com/hub
+# https://smith.langchain.com/hub/hwchase17/react-json
+# https://smith.langchain.com/hub/hwchase17/structured-chat-agent
+WORKER_SYSTEM_PROMPT = """Respond to the human as helpfully and accurately as possible. You have access to the following tools:
 
-# - Sports summaries (e.g., Rotowire, MLB, Turku Hockey, Basketball),
-# - Table-to-text generation (e.g., ToTTo),
-# - RDF graph verbalization (e.g., WebNLG),
-# - Dialogue summarization (e.g., Conversational Weather),
-# - Entity-centric descriptions (e.g., DART).
+{tools}
 
+Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input).
+
+Valid "action" values: "Final Answer" or {tool_names} if any
+
+Provide only ONE action per $JSON_BLOB, as shown:
+
+```
+{{
+  "action": $TOOL_NAME,
+  "action_input": $INPUT
+}}
+```
+
+Follow this format:
+
+Question: input question to answer
+Thought: consider previous and subsequent steps
+Action:
+```
+$JSON_BLOB
+```
+Observation: action result
+... (repeat Thought/Action/Observation N times)
+Thought: I know what to respond
+Action:
+```
+{{
+  "action": "Final Answer",
+  "action_input": "Final response to human"
+}}
+```
+
+Your final response should be formatted in {output_format} format.
+
+Begin! Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary. 
+Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observation. Do not generate triple-quotes in your response!"""
+
+
+
+WORKER_HUMAN_PROMPT = """{input}
+
+{agent_scratchpad}
+ (reminder to respond in a JSON blob no matter what)"""
+ 
+
+WORKER_PROMPT = """You are a specialized agent assigned to perform a specific roles:
+
+*** Task ***
+Based on your role and the input provided, execute your task completely and clearly. Avoid hallucinations or omissions, and only include information supported by the data.
+
+*** Output Requirements ***
+- Clearly explain your reasoning.
+- Present your result concisely and accurately.
+- Stick to the scope of your assigned role.
+"""
 
 ORCHESTRATOR_PROMPT = """You are the orchestrator agent for a structured data-to-text generation task. You supervise a three-step pipeline that includes:
 - content selection: {CS}
@@ -313,69 +367,6 @@ Attribute (Entity): Value
 - Output should be fluent, factually complete text consisting of multiple coherent paragraphs (if <paragraph> tags are present).
 - If only <snt> blocks are present, return a sentence per <snt>, separated by line breaks or formatted as flowing text.
 - The final result must be grammatically sound, semantically accurate, and naturally readable.
-"""
-
-
-# https://smith.langchain.com/hub/hwchase17/react-json
-# https://smith.langchain.com/hub/hwchase17/structured-chat-agent
-WORKER_SYSTEM_PROMPT = """Respond to the human as helpfully and accurately as possible. You have access to the following tools:
-
-{tools}
-
-Use a json blob to specify a tool by providing an action key (tool name) and an action_input key (tool input).
-
-Valid "action" values: "Final Answer" or {tool_names} if any
-
-Provide only ONE action per $JSON_BLOB, as shown:
-
-```
-{{
-  "action": $TOOL_NAME,
-  "action_input": $INPUT
-}}
-```
-
-Follow this format:
-
-Question: input question to answer
-Thought: consider previous and subsequent steps
-Action:
-```
-$JSON_BLOB
-```
-Observation: action result
-... (repeat Thought/Action/Observation N times)
-Thought: I know what to respond
-Action:
-```
-{{
-  "action": "Final Answer",
-  "action_input": "Final response to human"
-}}
-```
-
-Your final response should be formatted in {output_format} format.
-
-Begin! Reminder to ALWAYS respond with a valid json blob of a single action. Use tools if necessary. 
-Respond directly if appropriate. Format is Action:```$JSON_BLOB```then Observation. Do not generate triple-quotes in your response!"""
-
-
-
-WORKER_HUMAN_PROMPT = """{input}
-
-{agent_scratchpad}
- (reminder to respond in a JSON blob no matter what)"""
- 
-
-WORKER_PROMPT = """You are a specialized agent assigned to perform a specific roles:
-
-*** Task ***
-Based on your role and the input provided, execute your task completely and clearly. Avoid hallucinations or omissions, and only include information supported by the data.
-
-*** Output Requirements ***
-- Clearly explain your reasoning.
-- Present your result concisely and accurately.
-- Stick to the scope of your assigned role.
 """
 
 GUARDRAIL_PROMPT_CONTENT_SELECTION = """You are a guardrail evaluating the output of the 'content selection' agent in a structured data-to-text pipeline.

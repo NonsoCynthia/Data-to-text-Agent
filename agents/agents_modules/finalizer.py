@@ -18,8 +18,8 @@ class TaskFinalizer:
             prompt = f"{user_msg}\nUSER: {state.get('user_prompt', '')}"
             plan = state.get("execution_plan", [])
             plan_str = "\n".join(f"Step {i+1}: Worker '{p['worker']}' - '{p['step']}'" for i, p in enumerate(plan))
-            steps = state.get("history_of_steps", [])
-            step_log = "\n\n".join(summarize_agent_steps(steps)) or "No result steps."
+            history = state.get("history_of_steps", [])
+            step_log = "\n\n".join(summarize_agent_steps(history)) or "No result steps."
 
             final_input = FINALIZER_INPUT.format(input=prompt, result_steps=step_log, plan=plan_str)
 
@@ -29,11 +29,13 @@ class TaskFinalizer:
                 reply = executor.invoke({"input": final_input}).content.replace("Final Answer:", "").strip()
                 print(f"FINALIZER: {reply}")
 
-            steps.append(AgentStepOutput(
+            history.append(AgentStepOutput(
                 agent_name="finalizer",
                 agent_input=prompt,
                 agent_output=reply
             ))
 
-            return {"final_response": reply, "history_of_steps": steps}
+            return {"final_response": reply, 
+                    "history_of_steps": history
+                    }
         return run

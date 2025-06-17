@@ -11,12 +11,14 @@ class IntermediateToolUsage(BaseModel):
     tool_input: Union[List, Dict, Text]
     tool_output: Union[List, Dict, Text]
 
+
 class AgentStepOutput(BaseModel):
     """Internally used to store result steps in the agent's response."""
     agent_name: Text
     agent_input: Union[Text, Dict[str, Any]]
     agent_output: Union[List, Dict, Text]
     rationale: Optional[Union[List, Dict, Text]] = None
+
     
 class ExecutionState(TypedDict, total=False):  # set total=False to make all keys optional
     """Holds evolving state across agent pipeline execution."""

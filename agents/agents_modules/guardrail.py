@@ -38,14 +38,14 @@ class TaskGuardrail:
     @classmethod
     def evaluate(cls, agent: AgentExecutor):
         def run(state: ExecutionState):
-            steps = state.get("history_of_steps", [])
+            history = state.get("history_of_steps", [])
             idx = state.get("iteration_count", 0)
             max_iter = state.get("max_iteration", 50)
             user_input = state.get("user_prompt", "")
             raw_data = state.get("raw_data", "")
 
-            orch = next((s for s in reversed(steps) if s.agent_name == "orchestrator"), None)
-            worker = next((s for s in reversed(steps) if s.agent_name not in ["orchestrator", "guardrail", "planner"]), None)
+            orch = next((s for s in reversed(history) if s.agent_name == "orchestrator"), None)
+            worker = next((s for s in reversed(history) if s.agent_name not in ["orchestrator", "guardrail", "planner"]), None)
 
             task, task_input, output, rationale = "", "", "", ""
             if orch:
@@ -79,9 +79,9 @@ class TaskGuardrail:
                 # Construct structured review message
                 review_message = (
                     "=== GUARDRAIL REVIEW (surface realization) ===\n"
-                    f"[Fluency & Grammar]\n{fluency_result}\n\n"
-                    f"[Faithfulness & Adequacy]\n{faith_result}\n\n"
-                    f"[Coherence & Naturalness]\n{coherence_result}\n\n"
+                    f"[Fluency & Grammar]: {fluency_result}\n"
+                    f"[Faithfulness & Adequacy]: {faith_result}\n"
+                    f"[Coherence & Naturalness]: {coherence_result}\n"
                     f"OVERALL: {'CORRECT' if all(r.upper() == 'CORRECT' for r in [fluency_result, faith_result, coherence_result]) else 'Rerun with feedback'}"
                 )
 
@@ -117,9 +117,9 @@ class TaskGuardrail:
                 response = agent.invoke({"input": prompt}).content.strip()
                 final_verdict = response.split("FEEDBACK:")[-1].strip()
             
-            print(f"GUARDRAIL: {final_verdict}")
+            print(final_verdict)
 
-            steps.append(AgentStepOutput(
+            history.append(AgentStepOutput(
                 agent_name="guardrail",
                 agent_input=prompt,
                 agent_output=final_verdict,
@@ -128,14 +128,13 @@ class TaskGuardrail:
 
             # done = final_verdict.upper() == "CORRECT" and task == "surface realization"
             done = final_verdict.strip().upper() == "CORRECT"
-            return {
-                "response": "done" if done else None,
-                "history_of_steps": steps,
-                "iteration_count": idx + 1,
-                "max_iteration": max_iter,
-                "next_agent": "finalizer" if done else "orchestrator",
-                "next_agent_payload": user_input,
-                "review": final_verdict,
-            }
+            return {"next_agent": "finalizer" if done else "orchestrator",
+                    "response": "done" if done else None,
+                    "history_of_steps": history,
+                    "iteration_count": idx + 1,
+                    "max_iteration": max_iter,
+                    "next_agent_payload": user_input,
+                    "review": final_verdict,
+                }
 
         return run

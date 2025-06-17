@@ -39,15 +39,7 @@ class TaskOrchestrator:
                 feedback=f"GUARDRAIL FEEDBACK: {feedback}"
             )
 
-            if idx >= limit:
-                return {
-                    "next_agent": "finish",
-                    "next_agent_payload": "Limit reached.",
-                    "final_response": "stopped",
-                    "history_of_steps": history,
-                    "iteration_count": idx + 1,
-                    "max_iteration": limit
-                }
+
 
             output = executor.invoke({"input": payload}).content.strip()
             print(f"ORCHESTRATOR OUTPUT: {output}")
@@ -55,7 +47,9 @@ class TaskOrchestrator:
                 rationale, role, role_input = re.findall(r"Thought:\s*(.*?)\s*Worker:\s*(.*?)\s*Worker Input:\s*(.*)", output, re.DOTALL)[0]
             except Exception:
                 rationale, role, role_input = "parse error", "finish", output
+
             role = role.lower().strip("'\"")
+
             history.append(AgentStepOutput(
                 agent_name="orchestrator",
                 agent_input=payload,
@@ -63,10 +57,20 @@ class TaskOrchestrator:
                 rationale=rationale
             ))
 
+            if idx >= limit:
+                return {
+                    "next_agent": "finish",
+                    "final_response": "Stopped due to limit reached.",
+                    "next_agent_payload": "Limit reached.",
+                    "history_of_steps": history,
+                    "iteration_count": idx + 1,
+                    "max_iteration": limit
+                }
+
             return {
                 "next_agent": role,
-                "next_agent_payload": role_input,
                 "final_response": role_input,
+                "next_agent_payload": role_input,
                 "history_of_steps": history,
                 "iteration_count": idx + 1,
                 "max_iteration": limit
