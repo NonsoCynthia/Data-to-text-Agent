@@ -1,4 +1,6 @@
+import os
 import re
+import json
 from typing import List, Text, Union, Dict
 from agents.utilities.utils import AgentStepOutput
 
@@ -84,6 +86,45 @@ def summarize_agent_steps(step_log: List[AgentStepOutput]) -> List[Text]:
         step_counter += 1
 
     return summary
+
+
+def save_result_to_json(state: dict, filename: str = "result.json", directory: str = "results") -> None:
+    """
+    Saves the given agent workflow state to a JSON file in a specified directory.
+
+    Args:
+        state (dict): The final state returned by the agent graph execution.
+        filename (str): The name of the JSON file to save.
+        directory (str): The directory where the file will be saved.
+
+    Raises:
+        IsADirectoryError: If the target file path is a directory.
+    """
+
+    file_path = os.path.join(directory, filename)
+    os.makedirs(directory, exist_ok=True)
+
+    if os.path.isdir(file_path):
+        raise IsADirectoryError(f"Cannot write to '{file_path}' because it is a directory.")
+
+    # Recursively convert objects to serializable types
+    def make_serializable(obj):
+        if isinstance(obj, list):
+            return [make_serializable(x) for x in obj]
+        elif hasattr(obj, "model_dump"):  # Pydantic BaseModel
+            return obj.model_dump()
+        elif isinstance(obj, dict):
+            return {k: make_serializable(v) for k, v in obj.items()}
+        else:
+            return obj
+
+    serializable_state = make_serializable(dict(state))
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(serializable_state, f, indent=4)
+
+    print(f"Results saved to {file_path}")
+
 
 # import torch
 # from comet import download_model, load_from_checkpoint

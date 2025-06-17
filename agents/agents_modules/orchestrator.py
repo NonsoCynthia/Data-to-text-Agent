@@ -48,7 +48,7 @@ class TaskOrchestrator:
             except Exception:
                 rationale, role, role_input = "parse error", "finish", output
 
-            role = role.lower().strip("'\"")
+            role = role.lower().strip("'\"").replace("_", " ")
 
             history.append(AgentStepOutput(
                 agent_name="orchestrator",
