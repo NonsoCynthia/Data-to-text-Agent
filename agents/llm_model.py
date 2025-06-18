@@ -1,11 +1,9 @@
-import os
+import os, getpass
 from dotenv import load_dotenv, find_dotenv
 from typing import Dict, Optional, Text, Union
 from langchain_core.prompts import ChatPromptTemplate
 
 _ = load_dotenv(find_dotenv())  # Load environment variables
-# hf_token = os.getenv("HF_TOKEN")
-# openai_key = os.getenv("OPENAI_KEY")
 
 # === Base Interface ===
 class ModelBase:
@@ -36,8 +34,25 @@ class OllamaModel(ModelBase):
 class OpenAIModel(ModelBase):
     def __init__(self, model_name: str = "gpt-4", temperature: float = 0, api_key: Optional[str] = None):
         from langchain_openai import ChatOpenAI
-        openai_key = os.getenv("OPENAI_KEY") or api_key
+        openai_key = os.getenv("OPENAI_API_KEY") or api_key
         self.llm = ChatOpenAI(model=model_name, temperature=temperature, api_key=openai_key)
+
+    def model_(self, agent_prompts: Optional[Text]) -> Dict:
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", agent_prompts), ("human", "{input}")
+        ])
+        return prompt | self.llm
+
+    def raw_model(self):
+        return self.llm
+    
+# === Groq Model ===
+class GroqModel(ModelBase):
+    def __init__(self, model_name: str = "llama-3.3-70b-versatile", temperature: float = 0, api_key: Optional[str] = None):
+        from langchain_groq import ChatGroq
+        groq_key = os.getenv("GROQ_API_KEY") or api_key
+        os.environ["GROQ_API_KEY"] = groq_key
+        self.llm = ChatGroq(model=model_name, temperature=temperature, api_key=groq_key)
 
     def model_(self, agent_prompts: Optional[Text]) -> Dict:
         prompt = ChatPromptTemplate.from_messages([
@@ -91,19 +106,30 @@ class HFModel(ModelBase):
 class UnifiedModel:
     def __init__(self, provider: str, **kwargs):
         provider = provider.lower()
+
         if provider == "ollama":
             self.model = OllamaModel(**kwargs)
+
         elif provider == "openai":
-            kwargs.setdefault("api_key", os.getenv("OPENAI_KEY"))
+            kwargs.setdefault("api_key", os.getenv("OPENAI_API_KEY"))
             if not kwargs["api_key"]:
                 raise ValueError("OPENAI_API_KEY not found. Set it in .env or pass `api_key`.")
             self.model = OpenAIModel(**kwargs)
+
+        elif provider == "groq":
+            kwargs.setdefault("api_key", os.getenv("GROQ_API_KEY"))
+            if not kwargs["api_key"]:
+                raise ValueError("GROQ_API_KEY not found. Set it in .env or pass `api_key`.")
+            self.model = GroqModel(**kwargs)
+
         elif provider in ["hf", "huggingface"]:
             kwargs.setdefault("hf_token", os.getenv("HF_TOKEN"))
             self.model = HFModel(**kwargs)
+
         elif provider == "aixplain":
             kwargs.setdefault("model_id", "640b517694bf816d35a59125")
             self.model = AiXplainModel(**kwargs)
+
         else:
             raise ValueError(f"Unsupported provider: {provider}")
 
@@ -117,6 +143,7 @@ class UnifiedModel:
 model_name = {
     "ollama": {"model_name": "llama3.2", "temperature": 1.0},
     "openai": {"model_name": "gpt-4.1", "temperature": 1.0},
+    "groq": {"model_name": "deepseek-r1-distill-llama-70b", "temperature": 1.0},
     "hf": {"model_name": "HuggingFaceH4/zephyr-7b-beta", "temperature": 1.0},
     "aixplain": {"model_id": "640b517694bf816d35a59125", "temperature": 1.0},
 }#.get(provider.lower())
