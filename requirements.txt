@@ -11,19 +11,15 @@ bleurt-pytorch
 evaluate
 bert_score
 datasets
-ollama
 IPython
 langchain
-langchain_ollama
 langchain_core
 langchain-community
-langchain-ollama
-langchain-core
 langchain-experimental
+langchain-ollama
 langchain-openai
+langchain_groq
+langchain_anthropic
 langgraph
 langchainhub
-langgraph
-openai
-IPython
 #pip list --format=freeze --not-required > requirements.txt
