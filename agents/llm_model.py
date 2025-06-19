@@ -45,7 +45,25 @@ class OpenAIModel(ModelBase):
 
     def raw_model(self):
         return self.llm
+
+
+# === Anthropic Model ===
+class AnthropicModel(ModelBase):
+    def __init__(self, model_name: str = "claude-3-5-sonnet-latest", temperature: float = 0, api_key: Optional[str] = None):
+        from langchain_anthropic import ChatAnthropic
+        claude_key = os.environ.get("ANTHROPIC_API_KEY") or api_key
+        self.llm = ChatAnthropic(model=model_name, temperature=temperature, api_key=claude_key)
+
+    def model_(self, agent_prompts: Optional[Text]) -> Dict:
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", agent_prompts), ("human", "{input}")
+        ])
+        return prompt | self.llm
+
+    def raw_model(self):
+        return self.llm
     
+
 # === Groq Model ===
 class GroqModel(ModelBase):
     def __init__(self, model_name: str = "llama-3.3-70b-versatile", temperature: float = 0, api_key: Optional[str] = None):
@@ -62,8 +80,8 @@ class GroqModel(ModelBase):
 
     def raw_model(self):
         return self.llm
-    
 
+# === aiXplain Model ===
 class AiXplainModel(ModelBase):
     def __init__(self, model_id: str = "640b517694bf816d35a59125", temperature: float = 0.3, api_key: Optional[str] = None):
         from aixplain.factories import ModelFactory
@@ -80,8 +98,8 @@ class AiXplainModel(ModelBase):
     def raw_model(self):
         return self.llm
 
-# === HuggingFace Model ===
 
+# === HuggingFace Model ===
 class HFModel(ModelBase):
     def __init__(self, model_name: str = "HuggingFaceH4/zephyr-7b-beta", temperature: float = 0.3, api_key: Optional[str] = None):
         from langchain_huggingface import ChatHuggingFace
@@ -115,6 +133,12 @@ class UnifiedModel:
             if not kwargs["api_key"]:
                 raise ValueError("OPENAI_API_KEY not found. Set it in .env or pass `api_key`.")
             self.model = OpenAIModel(**kwargs)
+            
+        elif provider == "anthropic":
+            kwargs.setdefault("api_key", os.getenv("ANTHROPIC_API_KEY"))
+            if not kwargs["api_key"]:
+                raise ValueError("ANTHROPIC_API_KEY not found. Set it in .env or pass `api_key`.")
+            self.model = AnthropicModel(**kwargs)
 
         elif provider == "groq":
             kwargs.setdefault("api_key", os.getenv("GROQ_API_KEY"))
@@ -143,6 +167,7 @@ class UnifiedModel:
 model_name = {
     "ollama": {"model_name": "llama3.2", "temperature": 1.0},
     "openai": {"model_name": "gpt-4.1", "temperature": 1.0},
+    "anthropic": {"model_name": "claude-3-5-sonnet-latest", "temperature": 1.0},
     "groq": {"model_name": "deepseek-r1-distill-llama-70b", "temperature": 1.0},
     "hf": {"model_name": "HuggingFaceH4/zephyr-7b-beta", "temperature": 1.0},
     "aixplain": {"model_id": "640b517694bf816d35a59125", "temperature": 1.0},
