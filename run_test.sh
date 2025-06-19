@@ -10,7 +10,7 @@ conda activate lang2
 
 # Configuration
 SUPPLIER="openai"
-DATASET_NAME="webnlg"
+DATASET_NAME="webnlg_en"
 SPLIT="test"
 MAX_ITERATION=60
 OUTPUT_DIR="results"
@@ -21,16 +21,15 @@ EVAL_OUTPUT_FILE="${OUTPUT_DIR}/${DATASET_NAME}_eval_scores.jsonl"
 mkdir -p "$OUTPUT_DIR"
 
 # Run Python prediction script
-# python run_inference.py \
-#   --model_provider "$SUPPLIER" \
-#   --name "$DATASET_NAME" \
-#   --split "$SPLIT" \
-#   --output_file "$INFERENCE_OUTPUT_FILE" \
-#   --max_iteration "$MAX_ITERATION"
+python run_inference.py \
+  --model_provider "$SUPPLIER" \
+  --name "$DATASET_NAME" \
+  --split "$SPLIT" \
+  --output_file "$INFERENCE_OUTPUT_FILE" \
+  --max_iteration "$MAX_ITERATION"
 
 
 # === Step 2: Run evaluation ===
-# Evaluate predictions and store per-record scores
 python run_evaluation.py \
   --input_file "$INFERENCE_OUTPUT_FILE" \
   --dataset_name "$DATASET_NAME" \
