@@ -31,7 +31,11 @@ mkdir -p "$OUTPUT_DIR"
 
 # === Step 2: Run evaluation ===
 # Evaluate predictions and store per-record scores
-python run_evaluation.py --input_file "$INFERENCE_OUTPUT_FILE" --output_file "$EVAL_OUTPUT_FILE"
+python run_evaluation.py \
+  --input_file "$INFERENCE_OUTPUT_FILE" \
+  --dataset_name "$DATASET_NAME" \
+  --dataset_split "$SPLIT" \
+  --output_file "$EVAL_OUTPUT_FILE"
 
 
 # Usage:

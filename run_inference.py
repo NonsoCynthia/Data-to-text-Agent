@@ -79,10 +79,7 @@ for i in tqdm(range(10), desc=f"Resumable run for {args.name}"):
 
     output = {
         "index": i,
-        "input": input_data,
         "prediction": prediction,
-        "references": references,
-        "target": target
     }
 
     append_to_file(args.output_file, output)
