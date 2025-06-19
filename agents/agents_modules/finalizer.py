@@ -27,7 +27,8 @@ class TaskFinalizer:
                 reply = "I couldn't provide an answer because the maximum number of iterations was reached. Please try breaking the instruction into smaller questions by looking at the intermediate steps."
             else:
                 reply = executor.invoke({"input": final_input}).content.replace("Final Answer:", "").strip()
-                print(f"FINALIZER: {reply}")
+                
+                # print(f"FINALIZER: {reply}")
 
             history.append(AgentStepOutput(
                 agent_name="finalizer",

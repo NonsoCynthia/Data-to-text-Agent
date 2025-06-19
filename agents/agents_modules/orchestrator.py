@@ -40,7 +40,9 @@ class TaskOrchestrator:
             )
 
             output = executor.invoke({"input": payload}).content.strip()
-            print(f"ORCHESTRATOR OUTPUT: {output}")
+            
+            # print(f"ORCHESTRATOR OUTPUT: {output}")
+            
             try:
                 rationale, role, role_input = re.findall(r"Thought:\s*(.*?)\s*Worker:\s*(.*?)\s*Worker Input:\s*(.*)", output, re.DOTALL)[0]
             except Exception:

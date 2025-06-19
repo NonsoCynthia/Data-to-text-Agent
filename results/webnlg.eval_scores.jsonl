@@ -1,0 +1,8 @@
+{
+  "average_bleu": 0.267,
+  "average_meteor": 0.726,
+  "average_rouge_f1": 0.55,
+  "comet_scores": 0.822,
+  "average_bertscore_f1": 0.931,
+  "average_bleurt": 0.675
+}

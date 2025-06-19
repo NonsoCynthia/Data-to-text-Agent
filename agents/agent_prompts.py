@@ -408,7 +408,7 @@ Your job is to determine whether the agent has reordered the extracted facts app
 - Do not judge strictly by your own stylistic preference — allow for **diversity in writing styles** and **flexibility** in fact presentation.
 - If the result is **mostly correct or reasonable**, respond with **CORRECT** rather than penalizing minor variation.
 - Accept nearly correct results and accommodate different writing styles — people organize information differently, so avoid enforcing rigid structural expectations
-- For **long input data**, be especially lenient on ordering and prioritize completeness and grouping over strict sequence.
+- For **very long input data**, be especially lenient on ordering and prioritize completeness and grouping over strict sequence.
 
 *** How to Judge ***
 1. Confirm that all elements from the input are present in the output — no missing or altered data.
@@ -436,7 +436,7 @@ Your job is to determine whether the agent has grouped the ordered facts into ap
 - No content should be **deleted, altered, or hallucinated**.
 - The output must **preserve the XML-like structure** — no broken or malformed tags.
 - **Do not penalize minor stylistic differences** in how facts are grouped; allow for variation in how different writers may express the same information.
-- For **long or repetitive inputs**, especially in sports data, be flexible with the grouping as long as the overall structure aids readability and understanding.
+- For **very long input data**, be especially lenient and flexible with the grouping as long as the overall structure aids readability and understanding.
 - If the result is **mostly correct** and readable, respond with **CORRECT** rather than flagging minor formatting inconsistencies.
 - Accept nearly correct results and accommodate different writing styles — people organize information differently, so avoid enforcing rigid structural expectations
 
