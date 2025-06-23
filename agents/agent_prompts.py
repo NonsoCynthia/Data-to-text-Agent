@@ -662,5 +662,5 @@ Your output must:
 
 Here is the data:
 
-{input_data}
+{data}
 """

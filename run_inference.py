@@ -5,7 +5,7 @@ from tqdm import tqdm
 from agents.agents_modules.workflow import build_agent_workflow
 from agents.dataloader import load_dataset_by_name, extract_example
 from agents.llm_model import UnifiedModel, model_name
-from agents.agent_prompts import END_TO_END_GENERATION_PROMPT, input_prompt
+from agents.agent_prompts import END_TO_END_GENERATION_PROMPT, input_prompt, CONTENT_SELECTION_PROMPT
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -39,7 +39,7 @@ def run():
 
     dataset = load_dataset_by_name(args.name)[args.split]
     workflow = build_agent_workflow(provider=args.model_provider)
-    
+    conf = model_name.get(args.model_provider.lower())
     num_samples = len(dataset)
     print(f"Processing {num_samples} samples from '{args.name}' ({args.split})...")
 
@@ -52,7 +52,10 @@ def run():
         # references = sample.get("references", [])
         # target = sample.get("target", "")
 
-        prompt = input_prompt.format(input_data=input_data)
+        llm = UnifiedModel(provider=args.model_provider, **conf).model_(CONTENT_SELECTION_PROMPT)
+        content_extract = llm.invoke({'input': input_data}).content.strip()
+
+        prompt = input_prompt.format(data=content_extract)
 
         try:
             if args.type != "e2e":
@@ -73,7 +76,6 @@ def run():
 
             else:
                 # End-to-end generation
-                conf = model_name.get(args.model_provider.lower())
                 llm = UnifiedModel(provider=args.model_provider, **conf).model_(END_TO_END_GENERATION_PROMPT)
                 prediction = llm.invoke({'input': prompt}).content.strip()
 
