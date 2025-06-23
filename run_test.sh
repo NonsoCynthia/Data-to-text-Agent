@@ -12,6 +12,7 @@ conda activate lang2
 SUPPLIER="openai"
 DATASET_NAME="webnlg_en"
 SPLIT="test"
+TYPE="agent"
 MAX_ITERATION=60
 OUTPUT_DIR="results"
 INFERENCE_OUTPUT_FILE="${OUTPUT_DIR}/${DATASET_NAME}.json"

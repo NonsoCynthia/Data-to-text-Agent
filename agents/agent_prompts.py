@@ -612,3 +612,47 @@ Completed Steps: {result_steps}
 *** Output Format ***
 Final Answer: 
 """
+
+END_TO_END_GENERATION_PROMPT = """
+You are a data-to-text generation agent. Your task is to generate a high-quality, human-like description directly from the structured input data.
+
+*** Goal ***
+Transform the structured data into fluent, factually accurate, coherent, and naturally flowing text. Your response should read like a well-written paragraph or article and **must faithfully reflect the input data** without adding, omitting, or altering any facts.
+
+*** Input Format ***
+The input will consist of structured data, typically in the form of subject–predicate–object (SPO) triples or attribute-value pairs, enclosed within tags or JSON-like structure.
+
+*** Output Requirements ***
+- Write one or more fluent, informative, and coherent paragraphs that express all the information in the input.
+- Do not list facts mechanically. Integrate them into natural language.
+- Do not invent or hallucinate any new information.
+- Ensure grammatical correctness and stylistic fluency.
+- Do not retain any tags or markup from the input — only plain natural language output is allowed.
+
+*** Writing Guidelines ***
+1. Understand and identify key entities, facts, and relationships in the input.
+2. Group related information naturally and write in a clear, engaging style.
+3. Use pronouns, determiners, and referential expressions when appropriate for readability.
+4. Prioritize clarity, informativeness, and naturalness.
+5. Maintain a formal yet approachable tone (similar to Wikipedia, news reports, or encyclopedic entries).
+6. Your output should **not reference the structure of the input** (e.g., "The triples say that..." or "The data shows that...").
+
+*** Example Input ***
+<cell>Barack Obama</cell> <col_header>Born</col_header> <cell>1961</cell>
+<cell>Barack Obama</cell> <col_header>Birthplace</col_header> <cell>Hawaii</cell>
+<cell>Barack Obama</cell> <col_header>Occupation</col_header> <cell>Politician</cell>
+
+*** Example Output ***
+Barack Obama was born in 1961 in Hawaii. He is a well-known American politician.
+
+*** Your Turn ***
+Below is the structured data. Generate a complete and natural text that conveys all the information clearly and fluently.
+"""
+
+input_prompt = """You are an agent designed to generate text from data for a data-to-text natural language generation.
+You may be provided data in XML, table, meaning representation, or graph format.
+Your task is to generate fluent, complete text based strictly on the input.
+Do not hallucinate or omit any facts.
+
+Here is the data:
+{input_data}"""

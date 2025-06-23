@@ -4,82 +4,90 @@ import argparse
 from tqdm import tqdm
 from agents.agents_modules.workflow import build_agent_workflow
 from agents.dataloader import load_dataset_by_name, extract_example
+from agents.llm_model import UnifiedModel, model_name
+from agents.agent_prompts import END_TO_END_GENERATION_PROMPT, input_prompt
 
-# === CLI Arguments ===
-parser = argparse.ArgumentParser()
-parser.add_argument("--model_provider", required=True, help="Model provider (e.g., openai, ollama, hf, aixplain)")
-parser.add_argument("--name", required=True, help="Dataset name (e.g., webnlg)")
-parser.add_argument("--split", default="test", help="Dataset split (e.g., test)")
-parser.add_argument("--output_file", required=True, help="Path to save predictions (.jsonl)")
-parser.add_argument("--max_iteration", type=int, required=True, help="Agent max iteration count (e.g., 60)")
-args = parser.parse_args()
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model_provider", required=True, help="Model provider (e.g., openai, ollama, hf, aixplain)")
+    parser.add_argument("--name", required=True, help="Dataset name (e.g., webnlg)")
+    parser.add_argument("--split", default="test", help="Dataset split (e.g., test)")
+    parser.add_argument("--type", default="test", help="Generation type: 'agent' or 'e2e'")
+    parser.add_argument("--output_file", required=True, help="Path to save predictions (.jsonl)")
+    parser.add_argument("--max_iteration", type=int, required=True, help="Max iteration count for agent execution")
+    return parser.parse_args()
 
-# === Utility Function to Append Output ===
 def append_to_file(output_file, output_data):
     with open(output_file, "a") as f:
         f.write(json.dumps(output_data) + "\n")
 
-# === Load Existing Indices (if any) ===
-completed_indices = set()
-if os.path.exists(args.output_file):
-    with open(args.output_file, "r") as f:
-        for line in f:
-            try:
-                record = json.loads(line)
-                completed_indices.add(record["index"])
-            except json.JSONDecodeError:
-                continue  # skip corrupted lines
+def load_completed_indices(output_file):
+    indices = set()
+    if os.path.exists(output_file):
+        with open(output_file, "r") as f:
+            for line in f:
+                try:
+                    record = json.loads(line)
+                    indices.add(record["index"])
+                except json.JSONDecodeError:
+                    continue
+    return indices
 
-# === Initialize Agent Workflow ===
-process_flow = build_agent_workflow(provider=args.model_provider)
+def run():
+    args = parse_args()
+    completed_indices = load_completed_indices(args.output_file)
 
-# === Load Dataset ===
-data = load_dataset_by_name(args.name)
-dataset = data[args.split]
-# print(f"Loaded {len(dataset)} examples from '{args.name}' [{args.split}]")
-# print(f"Skipping {len(completed_indices)} already processed samples")
+    dataset = load_dataset_by_name(args.name)[args.split]
+    workflow = build_agent_workflow(provider=args.model_provider)
+    
+    num_samples = len(dataset)
+    print(f"Processing {num_samples} samples from '{args.name}' ({args.split})...")
 
-query = """You are an agent designed to generate text from data for a data-to-text natural language generation.
-You may be provided data in XML, table, meaning representation, or graph format.
-Your task is to generate fluent, complete text based strictly on the input.
-Do not hallucinate or omit any facts.
+    for i in tqdm(range(num_samples), desc=f"{args.type.upper()} Generation"):
+        if i in completed_indices:
+            continue
 
-Here is the data:
-{input_data}"""
+        sample = extract_example(args.name, dataset[i])
+        input_data = sample.get("input", "")
+        # references = sample.get("references", [])
+        # target = sample.get("target", "")
 
-# === Run and Append Only Unseen Predictions ===
-# use len(dataset) for full run
-for i in tqdm(range(10), desc=f"Resumable run for {args.name}"):
-    if i in completed_indices:
-        continue
+        prompt = input_prompt.format(input_data=input_data)
 
-    sample = extract_example(args.name, dataset[i])
-    input_data = sample.get("input", "")
-    references = sample.get("references", [])
-    target = sample.get("target", "")
+        try:
+            if args.type != "e2e":
+                # Agent-based generation
+                state = {
+                    "user_prompt": prompt,
+                    "raw_data": input_data,
+                    "history_of_steps": [],
+                    "final_response": "",
+                    "next_agent": "",
+                    "next_agent_payload": "",
+                    "current_step": 0,
+                    "iteration_count": 0,
+                    "max_iteration": args.max_iteration,
+                }
+                result = workflow.invoke(state, config={"recursion_limit": args.max_iteration})
+                prediction = result.get("final_response", "").strip()
 
-    state = {
-        "user_prompt": query.format(input_data=input_data),
-        "raw_data": input_data,
-        "history_of_steps": [],
-        "final_response": "",
-        "next_agent": "",
-        "next_agent_payload": "",
-        "current_step": 0,
-        "iteration_count": 0,
-        "max_iteration": args.max_iteration,
-    }
+            else:
+                # End-to-end generation
+                conf = model_name.get(args.model_provider.lower())
+                llm = UnifiedModel(provider=args.model_provider, **conf).model_(END_TO_END_GENERATION_PROMPT)
+                prediction = llm.invoke({'input': prompt}).content.strip()
 
-    try:
-        result = process_flow.invoke(state, config={"recursion_limit": args.max_iteration})
-        prediction = result.get("final_response", "").strip()
-    except Exception as e1:
-        print(f"Failed at index {i}: {e1}")
-        prediction = "ERROR"
+        except Exception as err:
+            print(f"[Error] Index {i}: {err}")
+            prediction = "ERROR"
 
-    output = {
-        "index": i,
-        "prediction": prediction,
-    }
+        append_to_file(args.output_file, {
+            "index": i,
+            "prediction": prediction,
+            # "input": input_data,        # optionally include these
+            # "references": references,
+            # "target": target
+        })
 
-    append_to_file(args.output_file, output)
+if __name__ == "__main__":
+    run()
