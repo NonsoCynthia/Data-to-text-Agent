@@ -88,7 +88,7 @@ def summarize_agent_steps(step_log: List[AgentStepOutput]) -> List[Text]:
     return summary
 
 
-def save_result_to_json(state: dict, filename: str = "result.json", directory: str = "results") -> None:
+def save_result_to_json(state: dict, dataset_folder= "", filename: str = "result.json", directory: str = "results") -> None:
     """
     Saves the given agent workflow state to a JSON file in a specified directory.
 
@@ -100,8 +100,11 @@ def save_result_to_json(state: dict, filename: str = "result.json", directory: s
     Raises:
         IsADirectoryError: If the target file path is a directory.
     """
-
-    file_path = os.path.join(directory, filename)
+    if dataset_folder != "":
+        file_path = os.path.join(directory, dataset_folder, filename)
+    else:
+        file_path = os.path.join(directory, filename)
+        
     os.makedirs(directory, exist_ok=True)
 
     if os.path.isdir(file_path):

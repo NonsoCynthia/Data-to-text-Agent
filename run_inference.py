@@ -4,6 +4,7 @@ import argparse
 from tqdm import tqdm
 from agents.agents_modules.workflow import build_agent_workflow
 from agents.dataloader import load_dataset_by_name, extract_example
+from agents.utilities.agent_utils import save_result_to_json
 from agents.llm_model import UnifiedModel, model_name
 from agents.agent_prompts import END_TO_END_GENERATION_PROMPT, input_prompt, CONTENT_SELECTION_PROMPT
 
@@ -72,6 +73,7 @@ def run():
                     "max_iteration": args.max_iteration,
                 }
                 result = workflow.invoke(state, config={"recursion_limit": args.max_iteration})
+                save_result_to_json(result, dataset_folder=f"{args.name}", filename=f"{args.name}_{i}.json")
                 prediction = result.get("final_response", "").strip()
 
             else:
