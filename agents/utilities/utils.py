@@ -5,13 +5,6 @@ from typing import Annotated, Dict, List, Text, Any, Optional, Union, TypedDict,
 from pydantic import BaseModel, Field
 
 
-class IntermediateToolUsage(BaseModel):
-    """Details each step where a tool was applied by an agent."""
-    tool_name: Text
-    tool_input: Union[List, Dict, Text]
-    tool_output: Union[List, Dict, Text]
-
-
 class AgentStepOutput(BaseModel):
     """Internally used to store result steps in the agent's response."""
     agent_name: Text
