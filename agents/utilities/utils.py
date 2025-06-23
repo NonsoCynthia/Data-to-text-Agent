@@ -23,12 +23,12 @@ class AgentStepOutput(BaseModel):
 class ExecutionState(TypedDict, total=False):  # set total=False to make all keys optional
     """Holds evolving state across agent pipeline execution."""
     user_prompt: Union[Text, Dict[str, Any]]
+    final_response: str
     raw_data: Union[Text, Dict[str, Any]]
-    history_of_steps: List[AgentStepOutput]
     next_agent: str
     next_agent_payload: str
-    final_response: str
     review: str
     iteration_count: int
     max_iteration: int
     current_step: int
+    history_of_steps: List[AgentStepOutput]
