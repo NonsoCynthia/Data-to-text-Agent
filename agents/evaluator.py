@@ -71,7 +71,7 @@ def evaluate_single(references, prediction, sources=None) -> dict:
             prediction,
             return_tensors='pt',
             padding=True,
-            truncation=True,  # ✅ truncate to max length
+            truncation=True,  #truncate to max length
             max_length=512).to(bleurt_model.device)
 
         bleurt_output = bleurt_model(**inputs).logits.flatten().item()
