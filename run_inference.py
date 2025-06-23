@@ -13,7 +13,7 @@ def parse_args():
     parser.add_argument("--name", required=True, help="Dataset name (e.g., webnlg)")
     parser.add_argument("--split", default="test", help="Dataset split (e.g., test)")
     parser.add_argument("--type", default="test", help="Generation type: 'agent' or 'e2e'")
-    parser.add_argument("--output_file", required=True, help="Path to save predictions (.jsonl)")
+    parser.add_argument("--output_file", required=True, help="Path to save predictions (output.jsonl)")
     parser.add_argument("--max_iteration", type=int, required=True, help="Max iteration count for agent execution")
     return parser.parse_args()
 

@@ -274,7 +274,7 @@ You will receive a list of strings in the format:
 *** Output Format ***
 Return the list of original strings organized with nested structure, like:
 
-<paragraph>
+```<paragraph>
 <snt>
 Attribute (Entity): Value  
 Attribute (Entity): Value
@@ -285,6 +285,7 @@ Attribute (Entity): Value
 Attribute (Entity): Value
 ... 
 </snt>
+...
 </paragraph>
 
 <paragraph>
@@ -299,6 +300,9 @@ Attribute (Entity): Value
 ... 
 </snt>
 </paragraph>
+
+...
+```
 
 """
 
@@ -339,7 +343,7 @@ This input may come from structured formats such as XML, tables, or subject–pr
 
 *** Input Format ***
 You will receive content similar to this:
-<paragraph>
+```<paragraph>
 <snt>
 Attribute (Entity): Value  
 Attribute (Entity): Value
@@ -347,7 +351,7 @@ Attribute (Entity): Value
 <snt>
 Attribute (Entity): Value
 </snt>
-</paragraph>
+</paragraph> ...```
 
 *** Output Instructions ***
 - Convert each <snt> into a fluent sentence.
@@ -614,28 +618,28 @@ Final Answer:
 """
 
 END_TO_END_GENERATION_PROMPT = """
-You are a data-to-text generation agent. Your task is to generate a high-quality, human-like description directly from the structured input data.
+You are a data-to-text generation agent. Your task is to generate a fluent, coherent, and factually accurate description from structured data.
 
-*** Goal ***
-Transform the structured data into fluent, factually accurate, coherent, and naturally flowing text. Your response should read like a well-written paragraph or article and **must faithfully reflect the input data** without adding, omitting, or altering any facts.
+*** Objective ***
+Convert the structured input into natural, human-like text that reads like a paragraph from an article or encyclopedic entry. The text must faithfully reflect all the input information — no facts should be added, omitted, or altered.
 
 *** Input Format ***
-The input will consist of structured data, typically in the form of subject–predicate–object (SPO) triples or attribute-value pairs, enclosed within tags or JSON-like structure.
+The data will be presented in structured formats such as subject–predicate–object (SPO) triples, attribute-value pairs, or tabular representations, often enclosed in tags or JSON-like syntax.
 
 *** Output Requirements ***
-- Write one or more fluent, informative, and coherent paragraphs that express all the information in the input.
-- Do not list facts mechanically. Integrate them into natural language.
-- Do not invent or hallucinate any new information.
-- Ensure grammatical correctness and stylistic fluency.
-- Do not retain any tags or markup from the input — only plain natural language output is allowed.
+- Produce fluent, well-formed paragraph(s) that clearly and completely express the input information.
+- Do **not** copy input tags or format markers into the output.
+- Do **not** mechanically list facts — integrate them smoothly into natural language.
+- Do **not** hallucinate or fabricate content.
+- Ensure grammatical correctness, stylistic fluency, and factual integrity.
 
 *** Writing Guidelines ***
-1. Understand and identify key entities, facts, and relationships in the input.
-2. Group related information naturally and write in a clear, engaging style.
-3. Use pronouns, determiners, and referential expressions when appropriate for readability.
-4. Prioritize clarity, informativeness, and naturalness.
-5. Maintain a formal yet approachable tone (similar to Wikipedia, news reports, or encyclopedic entries).
-6. Your output should **not reference the structure of the input** (e.g., "The triples say that..." or "The data shows that...").
+1. Identify key entities, relationships, and facts from the input.
+2. Group and order related facts logically to enhance readability and narrative flow.
+3. Use pronouns, determiners, and referential phrases where appropriate.
+4. Maintain a formal, neutral, and informative tone (similar to Wikipedia or a news article).
+5. Avoid referencing the input format (e.g., don’t say "The data says...").
+6. Do not include introductory or concluding phrases like "Here is the information about...".
 
 *** Example Input ***
 <cell>Barack Obama</cell> <col_header>Born</col_header> <cell>1961</cell>
@@ -644,15 +648,19 @@ The input will consist of structured data, typically in the form of subject–pr
 
 *** Example Output ***
 Barack Obama was born in 1961 in Hawaii. He is a well-known American politician.
-
-*** Your Turn ***
-Below is the structured data. Generate a complete and natural text that conveys all the information clearly and fluently.
 """
 
-input_prompt = """You are an agent designed to generate text from data for a data-to-text natural language generation.
-You may be provided data in XML, table, meaning representation, or graph format.
-Your task is to generate fluent, complete text based strictly on the input.
-Do not hallucinate or omit any facts.
+input_prompt = """You are a data-to-text generation agent.
+
+You will receive structured input data in formats such as XML, tables, graphs, or meaning representations. Your task is to generate fluent and coherent natural language text that conveys all the information in the input.
+
+Your output must:
+- Be factually faithful to the input (no omissions or hallucinations).
+- Be well-structured and grammatically correct.
+- Read naturally and engagingly, like a paragraph from a news report or encyclopedia.
+- Contain no references to the input structure or format.
 
 Here is the data:
-{input_data}"""
+
+{input_data}
+"""
