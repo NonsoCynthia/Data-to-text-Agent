@@ -16,7 +16,8 @@ class TaskOrchestrator:
     def init(cls, provider: str = "ollama") -> AgentExecutor:
         conf = model_name.get(provider.lower())
         return UnifiedModel(provider=provider, **conf).model_(
-            ORCHESTRATOR_PROMPT.format(CS=CONTENT_SELECTION_PROMPT,
+            ORCHESTRATOR_PROMPT.format(
+                                    #    CS=CONTENT_SELECTION_PROMPT,
                                        CO=CONTENT_ORDERING_PROMPT,
                                        TS=TEXT_STRUCTURING_PROMPT,
                                        SR=SURFACE_REALIZATION_PROMPT))

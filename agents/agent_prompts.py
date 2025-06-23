@@ -63,8 +63,8 @@ Based on your role and the input provided, execute your task completely and clea
 - Stick to the scope of your assigned role.
 """
 
+
 ORCHESTRATOR_PROMPT = """You are the orchestrator agent for a structured data-to-text generation task. You supervise a three-step pipeline that includes:
-- content selection: {CS}
 
 - content ordering: {CO}
 
@@ -73,7 +73,7 @@ ORCHESTRATOR_PROMPT = """You are the orchestrator agent for a structured data-to
 - surface realization: {SR}
 
 *** Workflow Policy ***
-- You must always follow the sequence: content selection → content ordering → text structuring → surface realization.
+- You must always follow the sequence: content ordering → text structuring → surface realization.
 - Do not skip or reorder stages unless a worker has already completed the task correctly.
 - You may only use one of the three worker names or return 'FINISH' or 'finalizer'.
 - You must reassign task to the same worker if the guardrail feedback indicates that the worker output is incorrect.
@@ -96,7 +96,7 @@ ORCHESTRATOR_PROMPT = """You are the orchestrator agent for a structured data-to
 
 *** Output Format ***
 Thought: (State your reasoning clearly based on what the user provided and what has already been completed.)
-Worker: (Choose from: 'content selection', 'content ordering', 'text structuring', 'surface realization', or 'FINISH' or 'finalizer')
+Worker: (Choose from: 'content ordering', 'text structuring', 'surface realization', or 'FINISH' or 'finalizer')
 Worker Input: (If 'FINISH' or 'finalizer', provide a final answer. Otherwise, provide the relevant data, rationale or context needed for the assigned worker to complete its step. Make sure to include instructions for the worker to follow, including any feedback from the guardrail that needs to be addressed.)
 """
 

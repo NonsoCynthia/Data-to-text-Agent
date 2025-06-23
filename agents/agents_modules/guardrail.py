@@ -88,11 +88,11 @@ class TaskGuardrail:
                 final_verdict = review_message
 
 
-            elif task == "content selection":
-                conf = model_name.get(cls.provider)
-                ordering_guard = UnifiedModel(cls.provider, **conf).model_(GUARDRAIL_PROMPT_CONTENT_SELECTION)
-                result = ordering_guard.invoke({"input": prompt}).content.strip()
-                final_verdict = result.split("FEEDBACK:")[-1].strip()
+            # elif task == "content selection":
+            #     conf = model_name.get(cls.provider)
+            #     ordering_guard = UnifiedModel(cls.provider, **conf).model_(GUARDRAIL_PROMPT_CONTENT_SELECTION)
+            #     result = ordering_guard.invoke({"input": prompt}).content.strip()
+            #     final_verdict = result.split("FEEDBACK:")[-1].strip()
             
             elif task == "content ordering":
                 conf = model_name.get(cls.provider)

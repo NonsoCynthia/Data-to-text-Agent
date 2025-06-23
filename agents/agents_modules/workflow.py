@@ -10,7 +10,7 @@ from agents.agent_prompts import (CONTENT_SELECTION_PROMPT, CONTENT_ORDERING_PRO
 
 
 WORKER_ROLES = {
-    "content selection": CONTENT_SELECTION_PROMPT,
+    # "content selection": CONTENT_SELECTION_PROMPT,
     "content ordering": CONTENT_ORDERING_PROMPT,
     "text structuring": TEXT_STRUCTURING_PROMPT,
     "surface realization": SURFACE_REALIZATION_PROMPT,
@@ -25,7 +25,8 @@ def add_workers(worker_prompts: Dict[str, str], graph: StateGraph, tools: List[A
     return added
 
 def guardrail_routing(state: ExecutionState) -> Literal["orchestrator", "finalizer"]:
-    expected = {"content selection", 
+    expected = {
+                # "content selection", 
                 "content ordering", 
                 "text structuring", 
                 "surface realization"}
