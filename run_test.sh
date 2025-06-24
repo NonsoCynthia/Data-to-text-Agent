@@ -10,7 +10,7 @@ conda activate lang2
 
 # Configuration
 SUPPLIER="openai"
-DATASET_NAME="webnlg_en"
+DATASET_NAME="webnlg"
 SPLIT="test"
 TYPE="agent"
 MAX_ITERATION=60
@@ -31,11 +31,11 @@ python run_inference.py \
 
 
 # === Step 2: Run evaluation ===
-python run_evaluation.py \
-  --input_file "$INFERENCE_OUTPUT_FILE" \
-  --dataset_name "$DATASET_NAME" \
-  --dataset_split "$SPLIT" \
-  --output_file "$EVAL_OUTPUT_FILE"
+# python run_evaluation.py \
+#   --input_file "$INFERENCE_OUTPUT_FILE" \
+#   --dataset_name "$DATASET_NAME" \
+#   --dataset_split "$SPLIT" \
+#   --output_file "$EVAL_OUTPUT_FILE"
 
 
 # Usage:

@@ -91,30 +91,24 @@ def summarize_agent_steps(step_log: List[AgentStepOutput]) -> List[Text]:
 def save_result_to_json(state: dict, dataset_folder= "", filename: str = "result.json", directory: str = "results") -> None:
     """
     Saves the given agent workflow state to a JSON file in a specified directory.
-
-    Args:
-        state (dict): The final state returned by the agent graph execution.
-        filename (str): The name of the JSON file to save.
-        directory (str): The directory where the file will be saved.
-
-    Raises:
-        IsADirectoryError: If the target file path is a directory.
     """
+    # Ensure full directory path exists
     if dataset_folder != "":
-        file_path = os.path.join(directory, dataset_folder, filename)
+        full_directory = os.path.join(directory, dataset_folder)
     else:
-        file_path = os.path.join(directory, filename)
-        
-    os.makedirs(directory, exist_ok=True)
+        full_directory = directory
+
+    os.makedirs(full_directory, exist_ok=True)
+
+    file_path = os.path.join(full_directory, filename)
 
     if os.path.isdir(file_path):
         raise IsADirectoryError(f"Cannot write to '{file_path}' because it is a directory.")
 
-    # Recursively convert objects to serializable types
     def make_serializable(obj):
         if isinstance(obj, list):
             return [make_serializable(x) for x in obj]
-        elif hasattr(obj, "model_dump"):  # Pydantic BaseModel
+        elif hasattr(obj, "model_dump"):
             return obj.model_dump()
         elif isinstance(obj, dict):
             return {k: make_serializable(v) for k, v in obj.items()}
@@ -126,7 +120,8 @@ def save_result_to_json(state: dict, dataset_folder= "", filename: str = "result
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(serializable_state, f, indent=4)
 
-    print(f"Results saved to {file_path}")
+    print(f"[SAVED] Agent result saved to: {file_path}")
+
 
 
 # import torch

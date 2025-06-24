@@ -44,7 +44,7 @@ def run():
     num_samples = len(dataset)
     print(f"Processing {num_samples} samples from '{args.name}' ({args.split})...")
 
-    for i in tqdm(range(num_samples), desc=f"{args.type.upper()} Generation"):
+    for i in tqdm(range(2), desc=f"{args.type.upper()} Generation"):
         if i in completed_indices:
             continue
 
@@ -55,7 +55,7 @@ def run():
 
         llm = UnifiedModel(provider=args.model_provider, **conf).model_(CONTENT_SELECTION_PROMPT)
         content_extract = llm.invoke({'input': input_data}).content.strip()
-
+        # print(content_extract)
         prompt = input_prompt.format(data=content_extract)
 
         try:
@@ -63,18 +63,15 @@ def run():
                 # Agent-based generation
                 state = {
                     "user_prompt": prompt,
-                    "raw_data": input_data,
-                    "history_of_steps": [],
-                    "final_response": "",
-                    "next_agent": "",
-                    "next_agent_payload": "",
-                    "current_step": 0,
-                    "iteration_count": 0,
                     "max_iteration": args.max_iteration,
                 }
                 result = workflow.invoke(state, config={"recursion_limit": args.max_iteration})
-                save_result_to_json(result, dataset_folder=f"{args.name}", filename=f"{args.name}_{i}.json")
-                prediction = result.get("final_response", "").strip()
+                if result:
+                    save_result_to_json(result, dataset_folder=f"{args.name}", filename=f"{args.name}_{i}.json")
+                    prediction = result.get("final_response", "").strip()
+                else:
+                    print(f"[WARNING] Empty state returned at index {i}")
+
 
             else:
                 # End-to-end generation

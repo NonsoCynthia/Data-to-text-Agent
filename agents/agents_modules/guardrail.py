@@ -42,7 +42,6 @@ class TaskGuardrail:
             idx = state.get("iteration_count", 0)
             max_iter = state.get("max_iteration", 50)
             user_input = state.get("user_prompt", "")
-            raw_data = state.get("raw_data", "")
 
             orch = next((s for s in reversed(history) if s.agent_name == "orchestrator"), None)
             worker = next((s for s in reversed(history) if s.agent_name not in ["orchestrator", "guardrail", "planner"]), None)
