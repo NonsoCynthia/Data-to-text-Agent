@@ -41,10 +41,10 @@ def run():
     dataset = load_dataset_by_name(args.name)[args.split]
     workflow = build_agent_workflow(provider=args.model_provider)
     conf = model_name.get(args.model_provider.lower())
-    num_samples = len(dataset)
+    num_samples = 10 #len(dataset)
     print(f"Processing {num_samples} samples from '{args.name}' ({args.split})...")
 
-    for i in tqdm(range(2), desc=f"{args.type.upper()} Generation"):
+    for i in tqdm(range(num_samples), desc=f"{args.type.upper()} Generation"):
         if i in completed_indices:
             continue
 

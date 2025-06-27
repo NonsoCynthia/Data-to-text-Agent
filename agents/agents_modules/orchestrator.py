@@ -36,8 +36,8 @@ class TaskOrchestrator:
 
             payload = ORCHESTRATOR_INPUT.format(
                 input=prompt,
-                result_steps=f"RESULT STEPS: {summary}" if summary else "",
-                feedback=f"GUARDRAIL FEEDBACK: {feedback}" if feedback else "",
+                result_steps=f"{summary}" if summary else "",
+                feedback=f"{feedback}" if feedback else "",
             )
 
             output = executor.invoke({"input": payload}).content.strip()

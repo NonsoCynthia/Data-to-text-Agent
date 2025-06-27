@@ -16,7 +16,7 @@ class ModelBase:
 
 # === Ollama Model ===
 class OllamaModel(ModelBase):
-    def __init__(self, model_name: str = "llama3.2", temperature: float = 0.3):
+    def __init__(self, model_name: str = "llama3.2", temperature: float = 0.0):
         from langchain_ollama import ChatOllama
         self.llm = ChatOllama(model=model_name, temperature=temperature)
 
@@ -32,7 +32,7 @@ class OllamaModel(ModelBase):
 
 # === OpenAI Model ===
 class OpenAIModel(ModelBase):
-    def __init__(self, model_name: str = "gpt-4", temperature: float = 0, api_key: Optional[str] = None):
+    def __init__(self, model_name: str = "gpt-4", temperature: float = 0.0, api_key: Optional[str] = None):
         from langchain_openai import ChatOpenAI
         openai_key = os.getenv("OPENAI_API_KEY") or api_key
         self.llm = ChatOpenAI(model=model_name, temperature=temperature, api_key=openai_key)
@@ -49,7 +49,7 @@ class OpenAIModel(ModelBase):
 
 # === Anthropic Model ===
 class AnthropicModel(ModelBase):
-    def __init__(self, model_name: str = "claude-3-5-sonnet-latest", temperature: float = 0, api_key: Optional[str] = None):
+    def __init__(self, model_name: str = "claude-3-5-sonnet-latest", temperature: float = 0.0, api_key: Optional[str] = None):
         from langchain_anthropic import ChatAnthropic
         claude_key = os.environ.get("ANTHROPIC_API_KEY") or api_key
         self.llm = ChatAnthropic(model=model_name, temperature=temperature, api_key=claude_key)
@@ -66,7 +66,7 @@ class AnthropicModel(ModelBase):
 
 # === Groq Model ===
 class GroqModel(ModelBase):
-    def __init__(self, model_name: str = "llama-3.3-70b-versatile", temperature: float = 0, api_key: Optional[str] = None):
+    def __init__(self, model_name: str = "llama-3.3-70b-versatile", temperature: float = 0.0, api_key: Optional[str] = None):
         from langchain_groq import ChatGroq
         groq_key = os.getenv("GROQ_API_KEY") or api_key
         os.environ["GROQ_API_KEY"] = groq_key
@@ -83,7 +83,7 @@ class GroqModel(ModelBase):
 
 # === aiXplain Model ===
 class AiXplainModel(ModelBase):
-    def __init__(self, model_id: str = "640b517694bf816d35a59125", temperature: float = 0.3, api_key: Optional[str] = None):
+    def __init__(self, model_id: str = "640b517694bf816d35a59125", temperature: float = 0.0, api_key: Optional[str] = None):
         from aixplain.factories import ModelFactory
         os.environ["TEAM_API_KEY"] = os.getenv("TEAM_API_KEY") or api_key
         self.llm = ModelFactory.get(model_id)
@@ -101,7 +101,7 @@ class AiXplainModel(ModelBase):
 
 # === HuggingFace Model ===
 class HFModel(ModelBase):
-    def __init__(self, model_name: str = "HuggingFaceH4/zephyr-7b-beta", temperature: float = 0.3, api_key: Optional[str] = None):
+    def __init__(self, model_name: str = "HuggingFaceH4/zephyr-7b-beta", temperature: float = 0.0, api_key: Optional[str] = None):
         from langchain_huggingface import ChatHuggingFace
         hf_token = os.getenv("HF_TOKEN") or api_key
         self.llm = ChatHuggingFace(
@@ -165,10 +165,10 @@ class UnifiedModel:
 
 
 model_name = {
-    "ollama": {"model_name": "llama3.2", "temperature": 1.0},
-    "openai": {"model_name": "gpt-4.1", "temperature": 1.0},
-    "anthropic": {"model_name": "claude-3-5-sonnet-latest", "temperature": 1.0},
-    "groq": {"model_name": "deepseek-r1-distill-llama-70b", "temperature": 1.0},
-    "hf": {"model_name": "HuggingFaceH4/zephyr-7b-beta", "temperature": 1.0},
-    "aixplain": {"model_id": "640b517694bf816d35a59125", "temperature": 1.0},
+    "ollama": {"model_name": "llama3.2", "temperature": 0.0},
+    "openai": {"model_name": "gpt-4o", "temperature": 0.0},
+    "anthropic": {"model_name": "claude-3-5-sonnet-latest", "temperature": 0.0},
+    "groq": {"model_name": "deepseek-r1-distill-llama-70b", "temperature": 0.0},
+    "hf": {"model_name": "HuggingFaceH4/zephyr-7b-beta", "temperature": 0.0},
+    "aixplain": {"model_id": "640b517694bf816d35a59125", "temperature": 0.0},
 }#.get(provider.lower())

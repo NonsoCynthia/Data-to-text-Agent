@@ -64,8 +64,7 @@ Based on your role and the input provided, execute your task completely and clea
 """
 
 
-ORCHESTRATOR_PROMPT = """You are the orchestrator agent for a structured data-to-text generation task. You supervise a three-step pipeline that includes:
-
+ORCHESTRATOR_PROMPT = """You are the orchestrator agent for a structured data-to-text generation task. Based on the user request, previous steps and  optional feedback, you may supervise a three-step pipeline that includes:
 - content ordering: {CO}
 
 - text structuring: {TS}
@@ -102,9 +101,9 @@ Worker Input: (If 'FINISH' or 'finalizer', provide a final answer. Otherwise, pr
 
 ORCHESTRATOR_INPUT = """USER REQUEST: {input}
 
-{result_steps}
+RESULT STEPS: {result_steps}
 
-{feedback}
+FEEDBACK: {feedback}
 
 ASSIGNMENT: 
 """

@@ -30,7 +30,7 @@ python run_inference.py \
   --max_iteration "$MAX_ITERATION"
 
 
-# === Step 2: Run evaluation ===
+# # === Step 2: Run evaluation ===
 # python run_evaluation.py \
 #   --input_file "$INFERENCE_OUTPUT_FILE" \
 #   --dataset_name "$DATASET_NAME" \
