@@ -44,11 +44,11 @@ def main(input_file, dataset_name, split, output_file):
 
     avg = {
         "average_bleu": round(mean(s["BLEU"] for s in scores), 3),
-        # "average_meteor": round(mean(s["METEOR"] for s in scores), 3),
-        # "average_rouge_f1": round(mean(s["ROUGE-F1"] for s in scores), 3),
-        # "average_comet": round(mean(s["COMET"] for s in scores), 3),
-        # "average_bertscore_f1": round(mean(s["BERTScore-F1"] for s in scores), 3),
-        # "average_bleurt": round(mean(s["BLEURT"] for s in scores), 3),
+        "average_meteor": round(mean(s["METEOR"] for s in scores), 3),
+        "average_rouge_f1": round(mean(s["ROUGE-F1"] for s in scores), 3),
+        "average_comet": round(mean(s["COMET"] for s in scores), 3),
+        "average_bertscore_f1": round(mean(s["BERTScore-F1"] for s in scores), 3),
+        "average_bleurt": round(mean(s["BLEURT"] for s in scores), 3),
     }
 
     # avg["average_bleu"] = round(mean(s["BLEU"] for s in scores), 3)

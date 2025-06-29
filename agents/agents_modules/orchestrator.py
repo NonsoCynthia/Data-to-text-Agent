@@ -46,17 +46,22 @@ class TaskOrchestrator:
             # print(f"ORCHESTRATOR OUTPUT: {output}")
             
             try:
-                rationale, role, role_input = re.findall(r"Thought:\s*(.*?)\s*Worker:\s*(.*?)\s*Worker Input:\s*(.*)", output, re.DOTALL)[0]
+                output_lower = output.lower()
+                if any(keyword in output_lower for keyword in ["instructions:", "instruction:"]):
+                    rationale, role, role_input, instruction = re.findall(r"Thought:\s*(.*?)\s*Worker:\s*(.*?)\s*Worker Input:\s*(.*?)\s*Instructions?:\s*(.*)", output, re.DOTALL)[0]
+                else:
+                    rationale, role, role_input = re.findall(r"Thought:\s*(.*?)\s*Worker:\s*(.*?)\s*Worker Input:\s*(.*)", output, re.DOTALL)[0]
+                    instruction = None
             except Exception:
-                rationale, role, role_input = "parse error", "finish", output
+                rationale, role, role_input, instruction = "parse error", "finish", output, None
 
             role = role.lower().strip("'\"").replace("_", " ")
 
             history.append(AgentStepOutput(
                 agent_name="orchestrator",
                 agent_input=payload,
-                agent_output=f"{role}(input='{role_input}')",
-                rationale=rationale
+                agent_output=f"{role}(input='{role_input}', instruction='{instruction}')",
+                rationale=rationale 
             ))
 
             if idx >= limit:
@@ -72,7 +77,7 @@ class TaskOrchestrator:
             return {
                 "next_agent": role,
                 "final_response": role_input,
-                "next_agent_payload": role_input,
+                "next_agent_payload": f"{role_input} Additional Instruction: {instruction}" if instruction else role_input,
                 "history_of_steps": history,
                 "iteration_count": idx + 1,
                 "max_iteration": limit

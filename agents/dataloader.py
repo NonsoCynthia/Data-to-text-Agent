@@ -16,7 +16,6 @@ from datasets import load_dataset
 # ---------------------------------------------------------------------------
 _GROUPED_WEBNLG_PATH = Path("/home/chinonso/PHD_PROJECTS/Data-to-text-Agent/results/fa_test_grouped.json")
 
-
 # ---------------------------------------------------------------------------
 # Loader map
 # ---------------------------------------------------------------------------
@@ -29,9 +28,7 @@ def get_dataset_loader() -> Dict[str, Callable]:
         "totto": lambda: load_dataset("GEM/totto", trust_remote_code=True),
         "sportsett_basketball": lambda: load_dataset("GEM/sportsett_basketball", trust_remote_code=True),
         "webnlg_hf": lambda: load_dataset("GEM/web_nlg", "en", trust_remote_code=True),
-        "webnlg": lambda: load_dataset(
-            "json", data_files={"test": str(_GROUPED_WEBNLG_PATH)}, trust_remote_code=True
-        ),
+        "webnlg": lambda: load_dataset("json", data_files={"test": str(_GROUPED_WEBNLG_PATH)}, trust_remote_code=True),
         "conversational_weather": lambda: load_dataset("GEM/conversational_weather", trust_remote_code=True),
         "dart": lambda: load_dataset("GEM/dart", trust_remote_code=True),
         "mlb": lambda: load_dataset("GEM/mlb_data_to_text", trust_remote_code=True),
@@ -50,7 +47,7 @@ def load_dataset_by_name(name: str):
 # Normalise examples so evaluator can use them uniformly
 # ---------------------------------------------------------------------------
 
-def extract_example(dataset_name: str, example: Dict) -> Dict:
+def extract_example(dataset_name: str, example: Dict, index: int = None) -> Dict:
     """Return a dict with keys: input, target, references (if available)."""
 
     if dataset_name == "rotowire":
@@ -69,10 +66,13 @@ def extract_example(dataset_name: str, example: Dict) -> Dict:
     # ---------------------------------------------------------------------
     # WebNLG original GEM version (single reference per example)
     # ---------------------------------------------------------------------
+
     elif dataset_name == "webnlg_hf":
+        # Use GEM's input/target, use our grouped references
         return {
             "input": example.get("input", ""),
             "target": example.get("target", ""),
+            "references": example.get("references", ""),
         }
 
     # ---------------------------------------------------------------------

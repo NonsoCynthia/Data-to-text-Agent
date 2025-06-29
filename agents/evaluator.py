@@ -54,45 +54,45 @@ class BatchEvaluator:
                                     lowercase=False,
                                 ).score / 100.0
 
-        # # METEOR (single reference, already 0‑1)
-        # meteor = single_meteor_score(
-        #     word_tokenize(references[0]), word_tokenize(prediction)
-        # )
+        # METEOR (single reference, already 0‑1)
+        meteor = single_meteor_score(
+            word_tokenize(references[0]), word_tokenize(prediction)
+        )
 
-        # # ROUGE (first reference, F‑measure already 0‑1)
-        # rouge_scores = rouge_scorer.RougeScorer(
-        #     ["rouge1", "rouge2", "rougeL"], use_stemmer=True
-        # ).score(references[0], prediction)
-        # rouge_f1 = sum(r.fmeasure for r in rouge_scores.values()) / 3
+        # ROUGE (first reference, F‑measure already 0‑1)
+        rouge_scores = rouge_scorer.RougeScorer(
+            ["rouge1", "rouge2", "rougeL"], use_stemmer=True
+        ).score(references[0], prediction)
+        rouge_f1 = sum(r.fmeasure for r in rouge_scores.values()) / 3
 
-        # # COMET
-        # inp = [{"src": sources[0], "mt": prediction, "ref": references[0]}]
-        # comet_score = self.comet.predict(inp, gpus=1 if self.device == "cuda" else 0)[0][0]
+        # COMET
+        inp = [{"src": sources[0], "mt": prediction, "ref": references[0]}]
+        comet_score = self.comet.predict(inp, gpus=1 if self.device == "cuda" else 0)[0][0]
 
-        # # BLEURT
-        # with torch.no_grad():
-        #     bleurt_inputs = self.bleurt_tok(
-        #         references[0],
-        #         prediction,
-        #         return_tensors="pt",
-        #         padding=True,
-        #         truncation=True,
-        #         max_length=512,
-        #     ).to(self.device)
-        #     bleurt_score = self.bleurt(**bleurt_inputs).logits.flatten().item()
+        # BLEURT
+        with torch.no_grad():
+            bleurt_inputs = self.bleurt_tok(
+                references[0],
+                prediction,
+                return_tensors="pt",
+                padding=True,
+                truncation=True,
+                max_length=512,
+            ).to(self.device)
+            bleurt_score = self.bleurt(**bleurt_inputs).logits.flatten().item()
 
-        # # BERTScore
-        # bert_f1 = self.bertscore.compute(
-        #     predictions=[prediction], references=[references], lang="en"
-        # )["f1"][0]
+        # BERTScore
+        bert_f1 = self.bertscore.compute(
+            predictions=[prediction], references=[references], lang="en"
+        )["f1"][0]
 
         return {
             "BLEU": bleu,
-            # "METEOR": meteor,
-            # "ROUGE-F1": rouge_f1,
-            # "COMET": comet_score,
-            # "BLEURT": bleurt_score,
-            # "BERTScore-F1": bert_f1,
+            "METEOR": meteor,
+            "ROUGE-F1": rouge_f1,
+            "COMET": comet_score,
+            "BLEURT": bleurt_score,
+            "BERTScore-F1": bert_f1,
         }
 
 

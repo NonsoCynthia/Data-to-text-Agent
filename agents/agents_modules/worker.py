@@ -39,6 +39,7 @@ class TaskWorker:
             history = state.get("history_of_steps", [])
             try:
                 out = agent.invoke({"input": inputs})
+                # print(f"Worker: {out}")
                 text = out.get("output") or out.get("action_input") or getattr(out, "content", str(out))
                 tools = out.get("result_steps", []) if isinstance(out, dict) else []
             except GraphRecursionError:
