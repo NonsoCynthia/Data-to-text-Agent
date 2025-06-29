@@ -123,7 +123,7 @@ Your job is to extract all relevant information from structured data formats (su
 - For each line, format your output as: `"Attribute (Entity): Value"` (e.g., `"Points (TJ Warren): 29"`).
 - Use full names or meaningful entity identifiers for clarity.
 - Group related facts by entity or subject where appropriate for coherence.
-- For the long data, usually for the sports data, do not extract entries that do not have any value (e.g. N/A, None). Only extract the most relevant and impactful data.
+- For the long or extended data, usually for the sports data, do not extract entries that do not have any value (e.g. N/A, None). Only extract the most relevant and impactful data.
 
 *** Output Format ***
 Return a human-readable list in this format:
@@ -259,13 +259,13 @@ You will receive a list of strings in the format:
 *** Instructions ***
 - Imagine how a human would naturally express these facts in text.
 - Group related facts that would logically appear in the same sentence using <snt> ... </snt> tags.
-- For long-form text, organize related <snt> groups that belong in the same paragraph within <paragraph> ... </paragraph> tags.
+- For long or nded text, organize related <snt> groups that belong in the same paragraph within <paragraph> ... </paragraph> tags.
 - Preserve the sequence and exact wording of each item.
 - Do not delete, rephrase, hallucinate, or change any content.
 - Do not modify the format of individual facts—only organize them with tags.
 - Prefer grouping facts under the same entity and follow the natural flow of how such information would be conveyed in writing.
 - Maintain one <snt> block per logical sentence and one <paragraph> block per thematically related group of sentences.
-- For long-form text, use 1–3 <paragraph> blocks. For short text, use 1 paragraph only.
+- For long or nded text, use multiple <paragraph> blocks. For short text, use 1 paragraph only.
 - Within each paragraph, must include multiple sentences enclosed in <snt> tags.
 - Also consider the instructions from the user if any.
  
@@ -390,7 +390,7 @@ Determine whether the agent has correctly extracted relevant content from struct
 3. Ensure no critical information is missing or misrepresented.
 4. Confirm that the agent did not introduce any code or unnatural transformations.
 5. Do not penalize the agent if it generates same entity twice. However, these entities should have a different attribute.
-6. For a very long input data, usually for the sports data, do not penalize the agent if it omits certain entries (e.g N/A, None), as long as the most important ones are present.
+6. For a very long input data, usually for the sports data, do not penalize the agent if it omits certain entries (e.g N/A, None), so far the important data are present.
 
 *** Output Format ***
 - If the selection is correct: respond with **CORRECT**
@@ -411,7 +411,6 @@ Your job is to determine whether the agent has reordered the extracted facts app
 - Do not judge strictly by your own stylistic preference — allow for **diversity in writing styles** and **flexibility** in fact presentation.
 - If the result is **mostly correct or reasonable**, respond with **CORRECT** rather than penalizing minor variation.
 - Accept nearly correct results and accommodate different writing styles — people organize information differently, so avoid enforcing rigid structural expectations
-- For **very long input data**, be especially lenient on ordering and prioritize completeness and grouping over strict sequence.
 
 *** How to Judge ***
 1. Confirm that all elements from the input are present in the output — no missing or altered data.
@@ -426,6 +425,7 @@ Your job is to determine whether the agent has reordered the extracted facts app
 
 FEEDBACK:
 """
+# - For **very long input data**, be especially lenient on ordering and prioritize completeness and grouping over strict sequence.
 
 GUARDRAIL_PROMPT_TEXT_STRUCTURING = """You are a guardrail evaluating the output of the 'text structuring' agent in a structured data-to-text pipeline.
 
@@ -439,7 +439,6 @@ Your job is to determine whether the agent has grouped the ordered facts into ap
 - No content should be **deleted, altered, or hallucinated**.
 - The output must **preserve the XML-like structure** — no broken or malformed tags.
 - **Do not penalize minor stylistic differences** in how facts are grouped; allow for variation in how different writers may express the same information.
-- For **very long input data**, be especially lenient and flexible with the grouping as long as the overall structure aids readability and understanding.
 - If the result is **mostly correct** and readable, respond with **CORRECT** rather than flagging minor formatting inconsistencies.
 - Accept nearly correct results and accommodate different writing styles — people organize information differently, so avoid enforcing rigid structural expectations
 
@@ -457,6 +456,7 @@ Your job is to determine whether the agent has grouped the ordered facts into ap
 
 FEEDBACK:
 """
+# - For **very long input data**, be especially lenient and flexible with the grouping as long as the overall structure aids readability and understanding.
 
 
 GUARDRAIL_PROMPT_SURFACE_REALIZATION = """You are an guardrail evaluating the output of the 'surface realization' agent in a data-to-text pipeline.
@@ -562,7 +562,7 @@ Do Not:
 - Reject outputs for non-sequential presentation of dates, years, numbers, or events. Coherent narratives can vary in order.
 - Rephrase, rewrite, or suggest improvements.
 - Judge based on personal preference or writing style.
-- Penalise the worker for rearranging the tables or data as long as the information is correct and complete.
+- Penalise the worker for rearranging the tables or data so far the information is correct and complete.
 
 Special Handling:
 - If the output contains an error message or signals failure, copy the message exactly.

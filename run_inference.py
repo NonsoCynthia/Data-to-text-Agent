@@ -40,7 +40,8 @@ def run():
 
     dataset = load_dataset_by_name(args.name)[args.split]
     workflow = build_agent_workflow(provider=args.model_provider)
-    conf = model_name.get(args.model_provider.lower())
+    conf = model_name.get(provider.lower(), {}).copy()
+    conf["temperature"] = 0.0
     num_samples = 10 #len(dataset)
     print(f"Processing {num_samples} samples from '{args.name}' ({args.split})...")
 

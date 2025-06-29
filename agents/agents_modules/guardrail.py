@@ -32,7 +32,8 @@ class TaskGuardrail:
     @classmethod
     def init(cls, provider: str = "ollama") -> AgentExecutor:
         cls.provider = provider
-        conf = model_name.get(provider.lower())
+        conf = model_name.get(provider.lower(), {}).copy()
+        conf["temperature"] = 0.0
         return UnifiedModel(provider=provider, **conf).model_(GUARDRAIL_PROMPT)
 
     @classmethod

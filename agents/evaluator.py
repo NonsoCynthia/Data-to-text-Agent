@@ -45,7 +45,14 @@ class BatchEvaluator:
 
         # BLEU (supports multiple references)
         # bleu = sacrebleu.raw_corpus_bleu([prediction], [[ref] for ref in references]).score/100
-        bleu = sentence_bleu([word_tokenize(ref) for ref in references], word_tokenize(prediction), smoothing_function=smoother.method1)
+        # bleu = sentence_bleu([word_tokenize(ref) for ref in references], word_tokenize(prediction), smoothing_function=smoother.method1)
+        bleu = sacrebleu.sentence_bleu(
+                                    prediction,           # hypothesis string
+                                    references,           # list of reference variants
+                                    smooth_method="exp",  # classic smoothing
+                                    tokenize="intl",      # standard detok rules
+                                    lowercase=False,
+                                ).score / 100.0
 
         # # METEOR (single reference, already 0‑1)
         # meteor = single_meteor_score(

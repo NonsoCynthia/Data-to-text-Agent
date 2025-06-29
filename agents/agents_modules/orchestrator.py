@@ -14,7 +14,8 @@ from agents.agent_prompts import (ORCHESTRATOR_PROMPT,
 class TaskOrchestrator:
     @classmethod
     def init(cls, provider: str = "ollama") -> AgentExecutor:
-        conf = model_name.get(provider.lower())
+        conf = model_name.get(provider.lower(), {}).copy()
+        conf["temperature"] = 0.0
         return UnifiedModel(provider=provider, **conf).model_(
             ORCHESTRATOR_PROMPT.format(
                                     #    CS=CONTENT_SELECTION_PROMPT,
