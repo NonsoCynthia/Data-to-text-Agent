@@ -39,11 +39,12 @@ class TaskWorker:
             history = state.get("history_of_steps", [])
             try:
                 out = agent.invoke({"input": inputs})
-                # print(f"Worker: {out}")
                 text = out.get("output") or out.get("action_input") or getattr(out, "content", str(out))
                 tools = out.get("result_steps", []) if isinstance(out, dict) else []
             except GraphRecursionError:
                 text, tools = "Too many iterations. Try splitting task.", []
+
+            # print(f"Worker: {out}")
 
             history.append(AgentStepOutput(
                 agent_name=role,
@@ -52,6 +53,7 @@ class TaskWorker:
                 rationale=text,
                 tool_steps=tools
             ))
+            
             return {"next_agent": "guardrail",
                     "history_of_steps": history, 
                     "iteration_count": idx + 1

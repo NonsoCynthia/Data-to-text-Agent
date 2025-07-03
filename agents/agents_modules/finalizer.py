@@ -19,16 +19,18 @@ class TaskFinalizer:
             plan = state.get("execution_plan", [])
             plan_str = "\n".join(f"Step {i+1}: Worker '{p['worker']}' - '{p['step']}'" for i, p in enumerate(plan))
             history = state.get("history_of_steps", [])
-            step_log = "\n\n".join(summarize_agent_steps(history)) or "No result steps."
+            step_log = "\n\n".join(summarize_agent_steps(history)[-2:]) or "No result steps."
 
-            final_input = FINALIZER_INPUT.format(input=prompt, result_steps=step_log, plan=plan_str)
+            final_input = FINALIZER_INPUT.format(input=prompt, 
+                                                 result_steps=step_log, 
+                                                 plan=plan_str)
 
             if state.get("response") == "incomplete":
                 reply = "I couldn't provide an answer because the maximum number of iterations was reached. Please try breaking the instruction into smaller questions by looking at the intermediate steps."
             else:
                 reply = executor.invoke({"input": final_input}).content.replace("Final Answer:", "").strip()
                 
-                # print(f"FINALIZER: {reply}")
+            # print(f"FINALIZER: {reply}")
 
             history.append(AgentStepOutput(
                 agent_name="finalizer",

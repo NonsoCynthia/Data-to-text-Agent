@@ -6,7 +6,7 @@ from agents.llm_model import UnifiedModel, model_name
 from agents.utilities.agent_utils import summarize_agent_steps
 from agents.agent_prompts import (ORCHESTRATOR_PROMPT, 
                                   ORCHESTRATOR_INPUT,
-                                  CONTENT_SELECTION_PROMPT,     
+                                #   CONTENT_SELECTION_PROMPT,     
                                   CONTENT_ORDERING_PROMPT, 
                                   TEXT_STRUCTURING_PROMPT, 
                                   SURFACE_REALIZATION_PROMPT)
@@ -33,7 +33,7 @@ class TaskOrchestrator:
             trace = "\n".join([f"{m['role'].upper()}: {m['content']}" for m in state.get("dialogue_trace", [])])
             prompt = f"{trace}\nUSER: {state.get('user_prompt', '')}"
             feedback = f"\n{prompt}\nFEEDBACK: {state.get('review', '')}"
-            summary = "\n\n".join(summarize_agent_steps(history))
+            summary = "\n\n".join(summarize_agent_steps(history)[-2:])
 
             payload = ORCHESTRATOR_INPUT.format(
                 input=prompt,
@@ -60,6 +60,7 @@ class TaskOrchestrator:
             history.append(AgentStepOutput(
                 agent_name="orchestrator",
                 agent_input=payload,
+                # agent_output=f"{role}(input='{role_input}')",
                 agent_output=f"{role}(input='{role_input}', instruction='{instruction}')",
                 rationale=rationale 
             ))

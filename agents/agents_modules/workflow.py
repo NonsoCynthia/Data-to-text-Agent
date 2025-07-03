@@ -5,12 +5,12 @@ from agents.agents_modules.orchestrator import TaskOrchestrator
 from agents.agents_modules.worker import TaskWorker
 from agents.agents_modules.guardrail import TaskGuardrail
 from agents.agents_modules.finalizer import TaskFinalizer
-from agents.agent_prompts import (CONTENT_SELECTION_PROMPT, CONTENT_ORDERING_PROMPT, 
-                                  TEXT_STRUCTURING_PROMPT, SURFACE_REALIZATION_PROMPT)
+from agents.agent_prompts import (CONTENT_ORDERING_PROMPT, 
+                                  TEXT_STRUCTURING_PROMPT, 
+                                  SURFACE_REALIZATION_PROMPT)
 
 
 WORKER_ROLES = {
-    # "content selection": CONTENT_SELECTION_PROMPT,
     "content ordering": CONTENT_ORDERING_PROMPT,
     "text structuring": TEXT_STRUCTURING_PROMPT,
     "surface realization": SURFACE_REALIZATION_PROMPT,
@@ -26,7 +26,6 @@ def add_workers(worker_prompts: Dict[str, str], graph: StateGraph, tools: List[A
 
 def guardrail_routing(state: ExecutionState) -> Literal["orchestrator", "finalizer"]:
     expected = {
-                # "content selection", 
                 "content ordering", 
                 "text structuring", 
                 "surface realization"}

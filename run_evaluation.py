@@ -18,6 +18,7 @@ def load_json_lines(path):
 
 
 def main(input_file, dataset_name, split, output_file):
+
     dataset = load_dataset_by_name(dataset_name)[split]
     evaluator = BatchEvaluator()  # load checkpoints
     scores = []
@@ -71,4 +72,5 @@ if __name__ == "__main__":
     p.add_argument("--dataset_split", default="test")
     p.add_argument("--output_file", required=True)
     args = p.parse_args()
+
     main(args.input_file, args.dataset_name, args.dataset_split, args.output_file)
