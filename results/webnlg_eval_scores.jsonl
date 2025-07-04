@@ -1,8 +1,17 @@
-{
-  "average_bleu": 0.267,
-  "average_meteor": 0.726,
-  "average_rouge_f1": 0.55,
-  "comet_scores": 0.822,
-  "average_bertscore_f1": 0.931,
-  "average_bleurt": 0.675
-}
+{"average_bleu": 0.246, 
+"average_meteor": 0.636, 
+"average_rouge_f1": 0.533, 
+"average_comet": 0.817, 
+"average_bertscore_f1": 0.936, 
+"average_bleurt": 0.692}
+
+{"average_bleu": 0.388, 
+"average_meteor": 0.636, 
+"average_rouge_f1": 0.533, 
+"average_comet": 0.817,
+"average_bertscore_f1": 0.948, 
+"average_bleurt": 0.692}
+
+{"average_bleu": 0.402}
+
+{"average_bleu": 0.422}

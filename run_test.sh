@@ -19,10 +19,11 @@ OUTPUT_DIR="results"
 INFERENCE_OUTPUT_FILE="${OUTPUT_DIR}/${DATASET_NAME}_${TYPE}.json"
 EVAL_OUTPUT_FILE="${OUTPUT_DIR}/${DATASET_NAME}_${TYPE}_eval_scores.jsonl"
 
+# Alternative output paths (disabled)
 # INFERENCE_OUTPUT_FILE="/home/chinonso/Documents/output_agent3/webnlg_agent.json"
 # EVAL_OUTPUT_FILE="${OUTPUT_DIR}/${DATASET_NAME}_${TYPE}_output_agent3_scores.jsonl"
 
-### Create output directory if it doesn't exist
+# Create output directory if it doesn't exist
 mkdir -p "$OUTPUT_DIR"
 
 # Decide which dataset name to send to run_inference.py
@@ -32,7 +33,7 @@ if [[ "$DATASET_NAME" == *"webnlg"* ]]; then
 fi
 # echo "Passing --name=$NAME_FOR_SCRIPT"
 
-#### Run Python prediction script
+# ##### Run Python prediction script
 python run_inference.py \
   --model_provider "$SUPPLIER" \
   --name "$NAME_FOR_SCRIPT" \
@@ -41,15 +42,13 @@ python run_inference.py \
   --output_file "$INFERENCE_OUTPUT_FILE" \
   --max_iteration "$MAX_ITERATION"
 
+#### Run evaluation
+python run_evaluation.py \
+  --input_file "$INFERENCE_OUTPUT_FILE" \
+  --dataset_name "$DATASET_NAME" \
+  --dataset_split "$SPLIT" \
+  --output_file "$EVAL_OUTPUT_FILE"
 
-# #### === Step 2: Run evaluation ===
-# python run_evaluation.py \
-#   --input_file "$INFERENCE_OUTPUT_FILE" \
-#   --dataset_name "$DATASET_NAME" \
-#   --dataset_split "$SPLIT" \
-#   --output_file "$EVAL_OUTPUT_FILE"
-
-
-### Usage:
-### chmod +x run_test.sh
-### ./run_test.sh
+# Usage:
+# chmod +x run_test.sh
+# ./run_test.sh

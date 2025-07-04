@@ -16,12 +16,12 @@ class TaskOrchestrator:
     def init(cls, provider: str = "ollama") -> AgentExecutor:
         conf = model_name.get(provider.lower(), {}).copy()
         conf["temperature"] = 0.0
-        return UnifiedModel(provider=provider, **conf).model_(
-            ORCHESTRATOR_PROMPT.format(
-                                    #    CS=CONTENT_SELECTION_PROMPT,
-                                       CO=CONTENT_ORDERING_PROMPT,
-                                       TS=TEXT_STRUCTURING_PROMPT,
-                                       SR=SURFACE_REALIZATION_PROMPT))
+        return UnifiedModel(provider=provider, **conf).model_(ORCHESTRATOR_PROMPT)
+            # ORCHESTRATOR_PROMPT.format(
+            #                         #    CS=CONTENT_SELECTION_PROMPT,
+            #                            CO=CONTENT_ORDERING_PROMPT,
+            #                            TS=TEXT_STRUCTURING_PROMPT,
+            #                            SR=SURFACE_REALIZATION_PROMPT))
 
     @classmethod
     def execute(cls, executor: AgentExecutor):
@@ -30,20 +30,21 @@ class TaskOrchestrator:
             limit = state.get("max_iteration", 50)
             history = state.get("history_of_steps", [])
 
-            trace = "\n".join([f"{m['role'].upper()}: {m['content']}" for m in state.get("dialogue_trace", [])])
-            prompt = f"{trace}\nUSER: {state.get('user_prompt', '')}"
-            feedback = f"\n{prompt}\nFEEDBACK: {state.get('review', '')}"
+            # trace = "\n".join([f"{m['role'].upper()}: {m['content']}" for m in state.get("dialogue_trace", [])])
+            prompt = state.get('user_prompt', '')
             summary = "\n\n".join(summarize_agent_steps(history)[-2:])
+            feedback = state.get('review', '')
 
             payload = ORCHESTRATOR_INPUT.format(
                 input=prompt,
-                result_steps=f"{summary}" if summary else "",
-                feedback=f"{feedback}" if feedback else "",
-            )
+                result_steps=f"\nRESULT STEPS: {summary}" if summary else "",
+                feedback=f"\nFEEDBACK: {feedback}" if feedback else "",
+            ).replace("\n\n\n", "\n")
 
             output = executor.invoke({"input": payload}).content.strip()
             
-            # print(f"ORCHESTRATOR OUTPUT: {output}")
+            # print(f"\n\nORCHESTRATOR INPUT: {payload}")
+            # print(f"\n\nORCHESTRATOR OUTPUT: {output}")
             
             try:
                 output_lower = output.lower()
@@ -62,7 +63,7 @@ class TaskOrchestrator:
                 agent_input=payload,
                 # agent_output=f"{role}(input='{role_input}')",
                 agent_output=f"{role}(input='{role_input}', instruction='{instruction}')",
-                rationale=rationale 
+                rationale=rationale,
             ))
 
             if idx >= limit:
@@ -78,7 +79,7 @@ class TaskOrchestrator:
             return {
                 "next_agent": role,
                 "final_response": role_input,
-                "next_agent_payload": f"{role_input} Additional Instruction: {instruction}" if instruction else role_input,
+                "next_agent_payload": f"{role_input} \nAdditional Instruction: {instruction}" if instruction else role_input,
                 "history_of_steps": history,
                 "iteration_count": idx + 1,
                 "max_iteration": limit

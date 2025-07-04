@@ -25,12 +25,19 @@ def add_workers(worker_prompts: Dict[str, str], graph: StateGraph, tools: List[A
     return added
 
 def guardrail_routing(state: ExecutionState) -> Literal["orchestrator", "finalizer"]:
-    expected = {
-                "content ordering", 
-                "text structuring", 
-                "surface realization"}
-    done = {step.agent_name.lower() for step in state.get("history_of_steps", []) if step.agent_name.lower() in expected}
-    return "finalizer" if expected.issubset(done) and "correct" in state.get("review", "").lower() else "orchestrator"
+    expected = {"content ordering", "text structuring", "surface realization"}
+    done = {step.agent_name.strip().lower() for step in state.get("history_of_steps", []) if getattr(step, 'agent_name', None) and step.agent_name.strip().lower() in expected}
+    review = state.get("review", "").strip().lower()
+
+    # Move to finalizer only if all required steps are done and output is marked correct
+    if expected.issubset(done) and "correct" in review:
+        return "finalizer"
+    # If surface realization needs to be rerun, route back to orchestrator
+    if "rerun surface realization with feedback" in review:
+        return "orchestrator"
+    # Default: continue orchestration
+    return "orchestrator"
+    # return "finalizer" if expected.issubset(done) and "correct" in review else "orchestrator"
 
 def build_agent_workflow(provider: str = "ollama") -> StateGraph:
     flow = StateGraph(ExecutionState)
@@ -56,7 +63,8 @@ def build_agent_workflow(provider: str = "ollama") -> StateGraph:
     flow.add_conditional_edges("orchestrator", lambda state: state["next_agent"], routes)
     for w in workers:
         flow.add_edge(w, "guardrail")
-    flow.add_conditional_edges("guardrail", guardrail_routing)
+    flow.add_conditional_edges("guardrail", guardrail_routing) #Original
+    # flow.add_edge("guardrail", "orchestrator") # Always to orchestrator
     flow.add_edge("finalizer", END)
 
     return flow.compile()

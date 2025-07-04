@@ -840,7 +840,8 @@ Produce well-formed text that fully and faithfully expresses all information pro
 
 Return only the final natural language text—fully fluent, coherent, and factually complete.
 """
-
+# Generate expertly crafted text that consolidates multiple facts into precise, well-constructed sentences and paragraphs, as appropriate. The output should mirror the writing style of a domain expert, prioritizing fluency, accuracy, and precision. Ensure that every fact from the input is fully conveyed in clear, natural language. The resulting text must be highly readable and free from any added, omitted, or altered information, as if written by a skilled linguist.
+# Produce text that fully conveys every fact from the input in clear, well-formed sentences and paragraphs. The result must be natural and easy to read, with no information added, omitted, or altered.
 
 GUARDRAIL_PROMPT_CONTENT_SELECTION = """You are a guardrail evaluating the output of the 'content selection' agent in a structured data-to-text pipeline.
 

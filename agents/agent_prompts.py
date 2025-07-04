@@ -32,18 +32,18 @@ Consistently provide every worker with:
 
 *** OUTPUT FORMAT ***
 Thought: (Provide a detailed reasoning process based on user requirements, completed stages, guardrail feedback, and clearly justify any task assignments or reassignments.)
-Worker: (Choose explicitly from: 'content ordering', 'text structuring', 'surface realization', 'FINISH', or 'finalizer')
-Worker Input: (For 'FINISH'/'finalizer': provide final answer. For other workers, provide explicit, detailed instructions incorporating all relevant data, context, guardrail feedback, and expectations clearly outlined to achieve optimal outcomes.)
-Instruction: (List/outline the task and supply any specific instructions or tips that will help the worker perform it accurately and efficiently.)
+Worker: (Choose explicitly from: 'content ordering', 'text structuring', 'surface realization', 'FINISH', or 'finalizer'.)
+Worker Input: (For 'FINISH' or 'finalizer', return the refined final text. For other workers, provide clear, detailed instructions, all relevant data, context, guardrail feedback, and set expectations for the task.)
+Instruction: (List/outline the task, expectations and supply any specific instructions or tips that will help the worker perform it accurately and efficiently.)
 
-***Do not add any other output fields except `Thought:`, `Worker:`, `Worker Input:` and `Instruction:`***
+***Only include the fields `Thought:`, `Worker:`, `Worker Input:`, and `Instruction:` in your output.***
 """
 
 ORCHESTRATOR_INPUT = """USER REQUEST: {input}
 
-RESULT STEPS: {result_steps}
+{result_steps}
 
-FEEDBACK: {feedback}
+{feedback}
 
 ASSIGNMENT: 
 """
@@ -277,9 +277,12 @@ Produce text that fully conveys every fact from the input in clear, well-formed 
 - Do not invent, omit, or modify any information from the input.
 - Combine facts from each <snt> block into fluent sentences, but feel free to merge information from multiple <snt> blocks to create richer, more informative sentences when appropriate.
 - Vary your sentence structure to avoid repetitive or formulaic language.
+- Make sure to use correct refering expressions (such as proper names, nouns, pronouns, noun phrases, dates and times, titles, numeric or unique Identifiers ) and determiners.
 - Use natural paragraphing when the input covers different topics or entities.
 - Avoid bullet points, lists, or any structured formatting in your output.
 - Ensure the final text is fluent, grammatically correct, semantically faithful, and easy to read.
+- Avoid repeating any fact—ensure each piece of information appears only once.
+- Present the text in a style that is natural, human-like, fluent, clear, and easy to read.
 
 *** OUTPUT ***
 Return only the final, fully fluent and factually complete natural language text.
@@ -430,9 +433,6 @@ Your job is to determine whether the agent has grouped the ordered facts into ap
 - No content should be **deleted, altered, or hallucinated**.
 - The output must **preserve the XML-like structure** — no broken or malformed tags.
 - **Do not penalize minor stylistic differences** in how facts are grouped; allow for variation in how different writers may express the same information.
-- If the result is **mostly correct** and readable, respond with **CORRECT** rather than flagging minor formatting inconsistencies.
-- Accept nearly correct results and accommodate different writing styles — people organize information differently, so avoid enforcing rigid structural expectations
-
 
 *** How to Judge ***
 1. Compare the output to the ordered input.
@@ -460,6 +460,7 @@ Determine whether the structured content has been accurately and fluently verbal
 - XML tags (e.g., <snt>, <cell>) should NOT appear in the output.
 - The output must read fluently and be grammatically correct.
 - Output must match the intended message of the structured content.
+- There should not be repetition of facts.
 
 *** Output Format ***
 - If correct: respond with 'CORRECT'
@@ -480,6 +481,7 @@ Determine whether the generated output is readable, well-formed, and free of gra
 *** Evaluation Criteria ***
 - **Fluency**: Sentences should read naturally and avoid awkward constructions or unnatural collocations.
 - **Grammaticality**: The text must be grammatically correct according to formal written English norms.
+- Penalize the text if there are repetitions such as in facts.
 
 *** Output Format ***
 - If both criteria are met: respond with 'CORRECT'

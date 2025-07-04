@@ -1,0 +1,50 @@
+{"average_bleu": 0.448, "average_meteor": 0.621, "average_rouge_f1": 0.552, "average_comet": 0.808, "average_bertscore_f1": 0.945, "average_bleurt": 0.687}
+{"average_bleu": 0.538, "average_meteor": 0.701, "average_rouge_f1": 0.614, "average_comet": 0.837, "average_bertscore_f1": 0.956, "average_bleurt": 0.709}
+{"average_bleu": 0.425, "average_meteor": 0.596, "average_rouge_f1": 0.541, "average_comet": 0.812, "average_bertscore_f1": 0.951, "average_bleurt": 0.683}
+// Old Prompts 1779 Samples
+{"average_bleu": 0.415, "average_meteor": 0.599, "average_rouge_f1": 0.54, "average_comet": 0.81, "average_bertscore_f1": 0.949, "average_bleurt": 0.683}
+// First 10 Samples with modified result steps
+{"average_bleu": 0.545, "average_meteor": 0.675, "average_rouge_f1": 0.609, "average_comet": 0.833, "average_bertscore_f1": 0.957, "average_bleurt": 0.72}
+// First 10 Samples with modified prompt. // The sentence seems very mechanical. Edit the prompt further.
+{"average_bleu": 0.537, "average_meteor": 0.74, "average_rouge_f1": 0.646, "average_comet": 0.839, "average_bertscore_f1": 0.955, "average_bleurt": 0.735}
+//I further modified the prompt by adding 5 examples to the CO, TS & SR. 10 Samples
+{"average_bleu": 0.614, "average_meteor": 0.761, "average_rouge_f1": 0.658, "average_comet": 0.849, "average_bertscore_f1": 0.959, "average_bleurt": 0.733}
+// Officially add the instruction field to the Orchestrator. Run 10 Samples
+{"average_bleu": 0.624, "average_meteor": 0.788, "average_rouge_f1": 0.704, "average_comet": 0.857, "average_bertscore_f1": 0.96, "average_bleurt": 0.75}
+// First 100 samples
+{"average_bleu": 0.524, "average_meteor": 0.667, "average_rouge_f1": 0.581, "average_comet": 0.831, "average_bertscore_f1": 0.955, "average_bleurt": 0.711}
+// 10 Samples
+{"average_bleu": 0.633, "average_meteor": 0.79, "average_rouge_f1": 0.705, "average_comet": 0.857, "average_bertscore_f1": 0.962, "average_bleurt": 0.759}
+// Always route guardrail to orchestrator
+{"average_bleu": 0.633, "average_meteor": 0.775, "average_rouge_f1": 0.675, "average_comet": 0.856, "average_bertscore_f1": 0.966, "average_bleurt": 0.739}
+//Added a condition for the surface realization guardrail to pass to the orchestrator if it finds rerun in the review with Goal SR modification
+{"average_bleu": 0.532, "average_meteor": 0.715, "average_rouge_f1": 0.618, "average_comet": 0.837, "average_bertscore_f1": 0.957, "average_bleurt": 0.721}
+// Back to old SR prompt but assded As a skilled liguist
+{"average_bleu": 0.539, "average_meteor": 0.7, "average_rouge_f1": 0.624, "average_comet": 0.841, "average_bertscore_f1": 0.959, "average_bleurt": 0.737}
+// Without skilled linguist
+{"average_bleu": 0.543, "average_meteor": 0.717, "average_rouge_f1": 0.632, "average_comet": 0.84, "average_bertscore_f1": 0.96, "average_bleurt": 0.727}
+// Worked on the rerouting
+{"average_bleu": 0.544, "average_meteor": 0.726, "average_rouge_f1": 0.618, "average_comet": 0.841, "average_bertscore_f1": 0.958, "average_bleurt": 0.718}
+//Reroute everything to orchestrator but with old SR Prompt.
+{"average_bleu": 0.621, "average_meteor": 0.76, "average_rouge_f1": 0.669, "average_comet": 0.852, "average_bertscore_f1": 0.962, "average_bleurt": 0.743}
+// Again
+{"average_bleu": 0.6, "average_meteor": 0.778, "average_rouge_f1": 0.662, "average_comet": 0.853, "average_bertscore_f1": 0.961, "average_bleurt": 0.74}
+{"average_bleu": 0.579, "average_meteor": 0.765, "average_rouge_f1": 0.667, "average_comet": 0.846, "average_bertscore_f1": 0.96, "average_bleurt": 0.745}
+{"average_bleu": 0.579, "average_meteor": 0.769, "average_rouge_f1": 0.661, "average_comet": 0.85, "average_bertscore_f1": 0.96, "average_bleurt": 0.733}
+{"average_bleu": 0.604, "average_meteor": 0.755, "average_rouge_f1": 0.656, "average_comet": 0.855, "average_bertscore_f1": 0.963, "average_bleurt": 0.732}
+// Use the routing and add referring expression
+{"average_bleu": 0.628, "average_meteor": 0.799, "average_rouge_f1": 0.708, "average_comet": 0.857, "average_bertscore_f1": 0.962, "average_bleurt": 0.743}
+//Change orch to original
+{"average_bleu": 0.605, "average_meteor": 0.763, "average_rouge_f1": 0.668, "average_comet": 0.854, "average_bertscore_f1": 0.964, "average_bleurt": 0.747}
+//return to my own orch
+{"average_bleu": 0.603, "average_meteor": 0.768, "average_rouge_f1": 0.672, "average_comet": 0.855, "average_bertscore_f1": 0.963, "average_bleurt": 0.741}
+// return to SR
+{"average_bleu": 0.605, "average_meteor": 0.768, "average_rouge_f1": 0.67, "average_comet": 0.854, "average_bertscore_f1": 0.962, "average_bleurt": 0.739}
+//100 samples
+{"average_bleu": 0.516, "average_meteor": 0.671, "average_rouge_f1": 0.576, "average_comet": 0.83, "average_bertscore_f1": 0.954, "average_bleurt": 0.705}
+//10 sample adding the .format in orch
+{"average_bleu": 0.586, "average_meteor": 0.763, "average_rouge_f1": 0.654, "average_comet": 0.849, "average_bertscore_f1": 0.958, "average_bleurt": 0.74}
+//10 update SR with RG
+{"average_bleu": 0.608, "average_meteor": 0.779, "average_rouge_f1": 0.681, "average_comet": 0.856, "average_bertscore_f1": 0.962, "average_bleurt": 0.742}
+//100 samples
+{"average_bleu": 0.514, "average_meteor": 0.668, "average_rouge_f1": 0.58, "average_comet": 0.831, "average_bertscore_f1": 0.956, "average_bleurt": 0.71}

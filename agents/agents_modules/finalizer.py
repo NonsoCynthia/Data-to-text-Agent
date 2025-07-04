@@ -30,7 +30,8 @@ class TaskFinalizer:
             else:
                 reply = executor.invoke({"input": final_input}).content.replace("Final Answer:", "").strip()
                 
-            # print(f"FINALIZER: {reply}")
+            # print(f"\n\nFINALIZER INPUT: {final_input}")
+            # print(f"\n\nFINALIZER OUTPUT: {reply}")
 
             history.append(AgentStepOutput(
                 agent_name="finalizer",

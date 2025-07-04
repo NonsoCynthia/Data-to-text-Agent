@@ -44,7 +44,8 @@ class TaskWorker:
             except GraphRecursionError:
                 text, tools = "Too many iterations. Try splitting task.", []
 
-            # print(f"Worker: {out}")
+            # print(f"\n\nWORKER INPUT: {inputs}")
+            # print(f"\n\nWORKER OUTPUT: {out}")
 
             history.append(AgentStepOutput(
                 agent_name=role,

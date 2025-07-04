@@ -56,10 +56,7 @@ class TaskGuardrail:
             prompt = GUARDRAIL_INPUT.format(
                                 # input=f"""Worker: {task}\n
                                 # Worker Description: {GUARDRAIL_TASKS.get(task.lower(), '').strip()}\n
-                                input=f"""Orchestrator Thought: {rationale}\n
-                                Worker Input: {task_input}\n
-                                Worker Output: {output}""",
-                            )
+                                input=f"""Orchestrator Thought: {rationale} \n\nWorker Input: {task_input} \n\nWorker Output: {output}""",)
 
             final_verdict = ""
 
@@ -107,7 +104,8 @@ class TaskGuardrail:
                 response = agent.invoke({"input": prompt}).content.strip()
                 final_verdict = response.split("FEEDBACK:")[-1].strip()
             
-            # print(final_verdict)
+            # print(f"\n\nGUARDRAIL INPUT: {prompt}")
+            # print(f"\n\nGUARDRAIL OUTPUT: {final_verdict}")
 
             history.append(AgentStepOutput(
                 agent_name="guardrail",
