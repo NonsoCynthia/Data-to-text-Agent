@@ -16,11 +16,22 @@ WORKER_ROLES = {
     "surface realization": SURFACE_REALIZATION_PROMPT,
 }
 
-def add_workers(worker_prompts: Dict[str, str], graph: StateGraph, tools: List[Any], query: Union[str, Dict[str, Any]], provider: str) -> List[str]:
+def add_workers_(worker_prompts: Dict[str, str], graph: StateGraph, tools: List[Any], user_prompt: Union[str, Dict[str, Any]], provider: str) -> List[str]:
     added = []
     for name, prompt in worker_prompts.items():
-        model = TaskWorker.init(description=prompt, tools=tools, context=query, provider=provider)
+        model = TaskWorker.init(description=prompt, tools=tools, context=user_prompt, provider=provider)
         graph.add_node(name, TaskWorker.execute(model, role=name))
+        added.append(name)
+    return added
+
+def add_workers(worker_prompts: Dict[str, str], graph: StateGraph, tools: List[Any], provider: str) -> List[str]:
+    added = []
+    for name, prompt in worker_prompts.items():
+        def node_fn(state, prompt=prompt, name=name):
+            user_prompt = state.get("user_prompt", "")
+            model = TaskWorker.init(description=prompt, tools=tools, context=user_prompt, provider=provider)
+            return TaskWorker.execute(model, role=name)(state)
+        graph.add_node(name, node_fn)
         added.append(name)
     return added
 
@@ -41,7 +52,8 @@ def guardrail_routing(state: ExecutionState) -> Literal["orchestrator", "finaliz
 
 def build_agent_workflow(provider: str = "ollama") -> StateGraph:
     flow = StateGraph(ExecutionState)
-    tools, query = [], ""
+    tools = []
+    user_prompt = ""
     workers = list(WORKER_ROLES.keys())
 
     flow.add_edge(START, "orchestrator")
@@ -51,7 +63,8 @@ def build_agent_workflow(provider: str = "ollama") -> StateGraph:
     flow.add_node("orchestrator", TaskOrchestrator.execute(TaskOrchestrator.init(provider)))
 
     # Workers
-    add_workers(WORKER_ROLES, flow, tools, query, provider)
+    add_workers_(WORKER_ROLES, flow, tools, user_prompt, provider)
+    # add_workers(WORKER_ROLES, flow, tools, provider)
 
     # guardrail & Finalizer
     flow.add_node("guardrail", TaskGuardrail.evaluate(TaskGuardrail.init(provider)))

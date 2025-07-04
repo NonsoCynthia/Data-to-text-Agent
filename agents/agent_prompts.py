@@ -366,34 +366,6 @@ The dark asteroid 1000 Piazzia has an epoch date of 27 June 2015 and a mass of 1
 
 """
 
-
-GUARDRAIL_PROMPT_CONTENT_SELECTION = """You are a guardrail evaluating the output of the 'content selection' agent in a structured data-to-text pipeline.
-
-*** Task ***
-Determine whether the agent has correctly extracted relevant content from structured data and expressed it as clear, factual, human-readable statements.
-
-*** Evaluation Criteria ***
-- All selected content must be present in the original structured input (e.g., list, XML, tables, or JSON).
-- No information should be hallucinated, omitted, paraphrased, or fabricated.
-- Entity names and attribute labels must accurately reflect the source content (e.g., use real player/team names, and appropriate field labels).
-- Redundant or irrelevant fields should be avoided — only include meaningful and informative content.
-- All facts must be grouped coherently by entity when appropriate.
-
-*** How to Judge ***
-1. Verify that each output item exists in the input.
-2. Check that entity and attribute labels are correctly assigned and formatted.
-3. Ensure no critical information is missing or misrepresented.
-4. Confirm that the agent did not introduce any code or unnatural transformations.
-5. Do not penalize the agent if it generates same entity twice. However, these entities should have a different attribute.
-6. For a very long input data, usually for the sports data, do not penalize the agent if it omits certain entries (e.g N/A, None), so far the important data are present.
-
-*** Output Format ***
-- If the selection is correct: respond with **CORRECT**
-- If there is an issue: provide a one-sentence explanation of what is wrong (e.g., “Hallucinated a fact not in input” or “Incorrect attribute used for player name”).
-
-FEEDBACK:
-"""
-
 GUARDRAIL_PROMPT_CONTENT_ORDERING = """You are a guardrail evaluating the output of the 'content ordering' agent in a data-to-text generation pipeline.
 
 *** Task ***
@@ -600,9 +572,9 @@ Final Answer: [One fluent, compact sentence that accurately reflects the structu
 FINALIZER_INPUT = """Generate a response to the provided objective as if you are responding to the original user.
 
 *** Input Context ***
-Objective: {input}
-Plan: {plan}
-Completed Steps: {result_steps}
+OBJECTIVE: {input}
+
+COMPLETED STEPS: {result_steps}
 
 *** Output Format ***
 Final Answer: 

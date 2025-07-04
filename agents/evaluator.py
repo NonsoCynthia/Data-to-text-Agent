@@ -1,58 +1,48 @@
 import nltk
-# nltk.download('all')
 import torch
 from nltk.tokenize import word_tokenize
-from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+from nltk.translate.bleu_score import SmoothingFunction
 smoother = SmoothingFunction()
 from nltk.translate.meteor_score import single_meteor_score
 from rouge_score import rouge_scorer
 import sacrebleu
+import pyter
 from comet import download_model, load_from_checkpoint
 from bleurt_pytorch import BleurtForSequenceClassification, BleurtTokenizer
 import evaluate
 
-# # Download NLTK resources
-# nltk.download('punkt', quiet=True)
-
 def ensure_list(x):
     return x if isinstance(x, list) else [x]
-
 
 class BatchEvaluator:
     """Load metric models once and reuse them for every example."""
 
     def __init__(self, device: str | None = None):
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-
-        # ---------- Heavy checkpoints (loaded once) ----------
         comet_ckpt = download_model("Unbabel/wmt22-comet-da")
         self.comet = load_from_checkpoint(comet_ckpt).to(self.device)
         self.comet.eval()
-
         self.bleurt_tok = BleurtTokenizer.from_pretrained("lucadiliello/BLEURT-20-D12")
         self.bleurt = (
             BleurtForSequenceClassification.from_pretrained("lucadiliello/BLEURT-20-D12")
             .to(self.device)
         )
         self.bleurt.eval()
-
         self.bertscore = evaluate.load("bertscore")
 
     def score(self, references, prediction, sources=None) -> dict:
-        """Return a dict with all metrics normalised to the 0‒1 interval."""
+        """Return a dict with all metrics normalized to the 0‒1 interval. Multi-ref for BLEU, TER, chrF++."""
         references = ensure_list(references)
         sources = ensure_list(sources) if sources is not None else references
 
         # BLEU (supports multiple references)
-        # bleu = sacrebleu.raw_corpus_bleu([prediction], [[ref] for ref in references]).score/100
-        # bleu = sentence_bleu([word_tokenize(ref) for ref in references], word_tokenize(prediction), smoothing_function=smoother.method1)
         bleu = sacrebleu.sentence_bleu(
-                                    prediction,           # hypothesis string
-                                    references,           # list of reference variants
-                                    smooth_method="exp",  # classic smoothing
-                                    tokenize="intl",      # standard detok rules
-                                    lowercase=False,
-                                ).score / 100.0
+            prediction,
+            references,
+            smooth_method="exp",
+            tokenize="intl",
+            lowercase=False,
+        ).score / 100.0
 
         # METEOR (single reference, already 0‑1)
         meteor = single_meteor_score(
@@ -65,11 +55,11 @@ class BatchEvaluator:
         ).score(references[0], prediction)
         rouge_f1 = sum(r.fmeasure for r in rouge_scores.values()) / 3
 
-        # COMET
+        # COMET (uses first reference/source)
         inp = [{"src": sources[0], "mt": prediction, "ref": references[0]}]
         comet_score = self.comet.predict(inp, gpus=1 if self.device == "cuda" else 0)[0][0]
 
-        # BLEURT
+        # BLEURT (first reference)
         with torch.no_grad():
             bleurt_inputs = self.bleurt_tok(
                 references[0],
@@ -81,10 +71,21 @@ class BatchEvaluator:
             ).to(self.device)
             bleurt_score = self.bleurt(**bleurt_inputs).logits.flatten().item()
 
-        # BERTScore
+        # BERTScore (multi-ref aware)
         bert_f1 = self.bertscore.compute(
             predictions=[prediction], references=[references], lang="en"
         )["f1"][0]
+
+        # TER (minimum TER over all references)
+        ter_scores = [
+            pyter.ter(prediction.split(), ref.split())
+            for ref in references if ref.strip()
+        ]
+        ter_score = min(ter_scores) if ter_scores else 1.0
+
+        # chrF++ (using sacrebleu, supports multi-ref)
+        chrfpp = sacrebleu.metrics.CHRF(word_order=2, char_order=6, beta=2)
+        chrf_score = chrfpp.sentence_score(prediction, references).score / 100.0
 
         return {
             "BLEU": bleu,
@@ -93,19 +94,21 @@ class BatchEvaluator:
             "COMET": comet_score,
             "BLEURT": bleurt_score,
             "BERTScore-F1": bert_f1,
+            "TER": ter_score,
+            "chrF++": chrf_score,
         }
-
 
 def evaluate_single(references, prediction, sources=None):
     _default_evaluator = BatchEvaluator()
-    """Legacy wrapper so existing code keeps working."""
     return _default_evaluator.score(references, prediction, sources)
 
-
 if __name__ == "__main__":
-    references = ["Gauff, just 15, shocks 5-time champ Venus, 39, at Wimbledon"]
-    prediction  = "15-year-old Gauff beats 5-time Wimbledon champ Venus"
-    source      = ["Cori Gauff, 15, defeated Venus Williams at Wimbledon."]
+    references = [
+        "Gauff, just 15, shocks 5-time champ Venus, 39, at Wimbledon",
+        "15-year-old Gauff beats 5-time Wimbledon champion Venus Williams"
+    ]
+    prediction = "15-year-old Gauff beats 5-time Wimbledon champ Venus"
+    source = ["Cori Gauff, 15, defeated Venus Williams at Wimbledon."]
 
     evaluator = BatchEvaluator()
     scores = evaluator.score(references, prediction, source)

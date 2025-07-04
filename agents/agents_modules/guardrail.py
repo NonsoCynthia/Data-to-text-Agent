@@ -15,7 +15,6 @@ from agents.agent_prompts import (
     TEXT_STRUCTURING_PROMPT, 
     SURFACE_REALIZATION_PROMPT,
 )
-# from agents.utilities.agent_utils import score_comet_quality
 
 GUARDRAIL_TASKS = {
     "content ordering": CONTENT_ORDERING_PROMPT,
@@ -39,11 +38,12 @@ class TaskGuardrail:
             history = state.get("history_of_steps", [])
             idx = state.get("iteration_count", 0)
             max_iter = state.get("max_iteration", 50)
-            user_input = state.get("user_prompt", "")
+            user_input = state.get("user_prompt", "") #User input prompt with the dataset entry
 
-            orch = next((s for s in reversed(history) if s.agent_name == "orchestrator"), None)
+            # Find the most recent (last) step in history that was produced by the "orchestrator" agent and the 'workers'.
+            orch = next((s for s in reversed(history) if s.agent_name == "orchestrator"), None) 
             worker = next((s for s in reversed(history) if s.agent_name not in ["orchestrator", "guardrail"]), None)
-
+            
             task, task_input, output, rationale = "", "", "", ""
             if orch:
                 rationale = orch.rationale
@@ -56,10 +56,12 @@ class TaskGuardrail:
             prompt = GUARDRAIL_INPUT.format(
                                 # input=f"""Worker: {task}\n
                                 # Worker Description: {GUARDRAIL_TASKS.get(task.lower(), '').strip()}\n
-                                input=f"""Orchestrator Thought: {rationale} \n\nWorker Input: {task_input} \n\nWorker Output: {output}""",)
+                                input=f"""Orchestrator Thought: {rationale} \n\nWorker Input: {task_input} \n\nWorker Output: {output}""",
+                                )
 
             final_verdict = ""
 
+            # According to the task, supply the guardrail prompt
             if task == "surface realization":
                 conf = model_name.get(cls.provider)
                 fluency_guard = UnifiedModel(cls.provider, **conf).model_(GUARDRAIL_PROMPT_FLUENCY_GRAMMAR)
@@ -76,9 +78,7 @@ class TaskGuardrail:
                     f"[Fluency & Grammar]: {fluency_result}\n"
                     f"[Faithfulness & Adequacy]: {faith_result}\n"
                     f"[Coherence & Naturalness]: {coherence_result}\n"
-                    f"OVERALL: {'CORRECT' if all(r.upper() == 'CORRECT' for r in [fluency_result, faith_result, coherence_result]) else f'Rerun {task} with feedback'}"
-                )
-
+                    f"OVERALL: {'CORRECT' if all(r.upper() == 'CORRECT' for r in [fluency_result, faith_result, coherence_result]) else f'Rerun {task} with feedback'}")
                 final_verdict = review_message
 
 
@@ -114,7 +114,6 @@ class TaskGuardrail:
                 rationale="Evaluation of worker output."
             ))
 
-            # done = final_verdict.upper() == "CORRECT" and task == "surface realization"
             done = final_verdict.strip().upper() == "CORRECT"
             return {"next_agent": "finalizer" if done else "orchestrator",
                     "response": "done" if done else None,

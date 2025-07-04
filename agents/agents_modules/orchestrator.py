@@ -28,13 +28,13 @@ class TaskOrchestrator:
         def run(state: ExecutionState):
             idx = state.get("iteration_count", 0)
             limit = state.get("max_iteration", 50)
-            history = state.get("history_of_steps", [])
+            history = state.get("history_of_steps", []) 
 
-            # trace = "\n".join([f"{m['role'].upper()}: {m['content']}" for m in state.get("dialogue_trace", [])])
-            prompt = state.get('user_prompt', '')
-            summary = "\n\n".join(summarize_agent_steps(history)[-2:])
-            feedback = state.get('review', '')
+            prompt = state.get('user_prompt', '') # User input
+            summary = "\n\n".join(summarize_agent_steps(history)[-2:]) # Last 2 agent interactions formated
+            feedback = state.get('review', '') #Guardrail feedback
 
+            #Input to the orch. agent
             payload = ORCHESTRATOR_INPUT.format(
                 input=prompt,
                 result_steps=f"\nRESULT STEPS: {summary}" if summary else "",
@@ -63,7 +63,7 @@ class TaskOrchestrator:
                 agent_input=payload,
                 # agent_output=f"{role}(input='{role_input}')",
                 agent_output=f"{role}(input='{role_input}', instruction='{instruction}')",
-                rationale=rationale,
+                rationale=f"{rationale} \nInstruction:\n{instruction}",
             ))
 
             if idx >= limit:

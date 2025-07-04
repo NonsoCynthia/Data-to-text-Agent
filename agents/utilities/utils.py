@@ -15,12 +15,12 @@ class AgentStepOutput(BaseModel):
     
 class ExecutionState(TypedDict, total=False):  # set total=False to make all keys optional
     """Holds evolving state across agent pipeline execution."""
-    user_prompt: Union[Text, Dict[str, Any]]
-    final_response: str
-    next_agent: str
-    next_agent_payload: str
-    review: str
-    iteration_count: int
-    max_iteration: int
-    current_step: int
-    history_of_steps: List[AgentStepOutput]
+    user_prompt: Union[Text, Dict[str, Any]]                    # User input to the agent system
+    final_response: str                                         # Final agent response
+    next_agent: str                                             # Next agent in the sequence
+    next_agent_payload: str                                     # Inputs to the agents in the sequence
+    review: str                                                 # Guardrail feedback
+    iteration_count: int                                        # Count of all steps done
+    max_iteration: int                                          # Recursion limit set in langChain
+    current_step: int                                           # Current step count
+    history_of_steps: List[AgentStepOutput]                     # A list of all the agent interactions
