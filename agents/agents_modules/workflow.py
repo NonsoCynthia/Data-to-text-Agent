@@ -52,8 +52,6 @@ def guardrail_routing(state: ExecutionState) -> Literal["orchestrator", "finaliz
 
 def build_agent_workflow(provider: str = "ollama") -> StateGraph:
     flow = StateGraph(ExecutionState)
-    tools = []
-    user_prompt = ""
     workers = list(WORKER_ROLES.keys())
 
     flow.add_edge(START, "orchestrator")
@@ -63,8 +61,10 @@ def build_agent_workflow(provider: str = "ollama") -> StateGraph:
     flow.add_node("orchestrator", TaskOrchestrator.execute(TaskOrchestrator.init(provider)))
 
     # Workers
-    add_workers_(WORKER_ROLES, flow, tools, user_prompt, provider)
-    # add_workers(WORKER_ROLES, flow, tools, provider)
+    tools = []
+    user_prompt = ""
+    add_workers_(WORKER_ROLES, flow, tools, user_prompt, provider) #remove user prompt
+    # add_workers(WORKER_ROLES, flow, tools, provider) #Add user prompt
 
     # guardrail & Finalizer
     flow.add_node("guardrail", TaskGuardrail.evaluate(TaskGuardrail.init(provider)))
