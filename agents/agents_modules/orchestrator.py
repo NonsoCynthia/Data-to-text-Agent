@@ -36,10 +36,10 @@ class TaskOrchestrator:
 
             #Input to the orch. agent
             payload = ORCHESTRATOR_INPUT.format(
-                input=prompt,
-                result_steps=f"\nRESULT STEPS: {summary}" if summary else "",
-                feedback=f"\nFEEDBACK: {feedback}" if feedback else "",
-            ).replace("\n\n\n", "\n")
+                                        input=prompt,
+                                        result_steps=f"\nRESULT STEPS: {summary}" if summary else "",
+                                        feedback=f"\nFEEDBACK: {feedback}" if feedback else "",
+                                        ).replace("\n\n\n", "\n")
 
             output = executor.invoke({"input": payload}).content.strip()
             
@@ -59,12 +59,12 @@ class TaskOrchestrator:
             role = role.lower().strip("'\"").replace("_", " ")
 
             history.append(AgentStepOutput(
-                agent_name="orchestrator",
-                agent_input=payload,
-                # agent_output=f"{role}(input='{role_input}')",
-                agent_output=f"{role}(input='{role_input}', instruction='{instruction}')",
-                rationale=f"{rationale} \nInstruction:\n{instruction}",
-            ))
+                            agent_name="orchestrator",
+                            agent_input=payload,
+                            # agent_output=f"{role}(input='{role_input}')",
+                            agent_output=f"{role}(input='{role_input}', instruction='{instruction}')",
+                            rationale=f"{rationale} \nInstruction:\n{instruction}",
+                        ))
 
             if idx >= limit:
                 return {

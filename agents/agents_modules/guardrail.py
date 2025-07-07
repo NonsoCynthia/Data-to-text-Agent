@@ -3,18 +3,18 @@ from langchain.agents import AgentExecutor
 from agents.utilities.utils import ExecutionState, AgentStepOutput
 from agents.llm_model import UnifiedModel, model_name
 from agents.agent_prompts import (
-    GUARDRAIL_PROMPT, 
-    GUARDRAIL_INPUT,
-    GUARDRAIL_PROMPT_CONTENT_ORDERING,
-    GUARDRAIL_PROMPT_TEXT_STRUCTURING,
-    GUARDRAIL_PROMPT_SURFACE_REALIZATION,
-    GUARDRAIL_PROMPT_FLUENCY_GRAMMAR,
-    GUARDRAIL_PROMPT_FAITHFUL_ADEQUACY,
-    GUARDRAIL_PROMPT_COHERENT_NATURAL,
-    CONTENT_ORDERING_PROMPT, 
-    TEXT_STRUCTURING_PROMPT, 
-    SURFACE_REALIZATION_PROMPT,
-)
+                        GUARDRAIL_PROMPT, 
+                        GUARDRAIL_INPUT,
+                        GUARDRAIL_PROMPT_CONTENT_ORDERING,
+                        GUARDRAIL_PROMPT_TEXT_STRUCTURING,
+                        # GUARDRAIL_PROMPT_SURFACE_REALIZATION,
+                        GUARDRAIL_PROMPT_FLUENCY_GRAMMAR,
+                        GUARDRAIL_PROMPT_FAITHFUL_ADEQUACY,
+                        GUARDRAIL_PROMPT_COHERENT_NATURAL,
+                        CONTENT_ORDERING_PROMPT, 
+                        TEXT_STRUCTURING_PROMPT, 
+                        SURFACE_REALIZATION_PROMPT,
+                    )
 
 GUARDRAIL_TASKS = {
     "content ordering": CONTENT_ORDERING_PROMPT,
@@ -80,13 +80,6 @@ class TaskGuardrail:
                     f"[Coherence & Naturalness]: {coherence_result}\n"
                     f"OVERALL: {'CORRECT' if all(r.upper() == 'CORRECT' for r in [fluency_result, faith_result, coherence_result]) else f'Rerun {task} with feedback'}")
                 final_verdict = review_message
-
-
-            # elif task == "content selection":
-            #     conf = model_name.get(cls.provider)
-            #     ordering_guard = UnifiedModel(cls.provider, **conf).model_(GUARDRAIL_PROMPT_CONTENT_SELECTION)
-            #     result = ordering_guard.invoke({"input": prompt}).content.strip()
-            #     final_verdict = result.split("FEEDBACK:")[-1].strip()
             
             elif task == "content ordering":
                 conf = model_name.get(cls.provider)

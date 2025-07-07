@@ -29,6 +29,7 @@ Consistently provide every worker with:
   - Clearly state expectations, requirements, and outcomes desired from the worker's efforts.
   - Strictly prohibit invention of new workers, data fields, or tasks outside the predefined scope.
   - Incorporate your explicit instructions clearly into your Thought reasoning.
+  - 
 
 *** OUTPUT FORMAT ***
 Thought: (Provide a detailed reasoning process based on user requirements, completed stages, guardrail feedback, and clearly justify any task assignments or reassignments.)
@@ -366,77 +367,79 @@ The dark asteroid 1000 Piazzia has an epoch date of 27 June 2015 and a mass of 1
 
 """
 
-GUARDRAIL_PROMPT_CONTENT_ORDERING = """You are a guardrail evaluating the output of the 'content ordering' agent in a data-to-text generation pipeline.
+GUARDRAIL_PROMPT_CONTENT_ORDERING = """
+You are a guardrail evaluating the output of the 'content ordering' agent in a WebNLG-style data-to-text generation pipeline.
 
 *** Task ***
-Your job is to determine whether the agent has reordered the extracted facts appropriately for fluent and natural verbalization.
+Determine whether the agent has reordered the extracted triples from the input Triple Set in a way that supports natural, fluent, and logical text generation.
 
 *** Evaluation Criteria ***
-- All original information must be **preserved exactly** — no deletions, merges, hallucinations, or rewording.
-- Only the **order** of facts should be changed to improve how the data flows when converted to text.
-- The sequence should support **clarity**, **readability**, and **coherence** in natural language.
-- Do not judge strictly by your own stylistic preference — allow for **diversity in writing styles** and **flexibility** in fact presentation.
-- If the result is **mostly correct or reasonable**, respond with **CORRECT** rather than penalizing minor variation.
-- Accept nearly correct results and accommodate different writing styles — people organize information differently, so avoid enforcing rigid structural expectations
+- **No-Omissions**: Every fact (triple) from the original input must be present in the output ordering.
+- **No-Additions**: No new facts, hallucinations, or fabricated information should be present.
+- **Order**: The sequence should enhance clarity and readability for sentence/paragraph generation, but there is *no single correct order*; accept multiple plausible groupings or sequences.
+- **Diversity in Style**: Do not penalize alternative, logically sound orderings or grouping styles. Accept nearly correct or reasonable results.
+- **Strictness**: Flag only if there are true structural issues (illogical jumps, misplaced groupings, clear confusion, or missing/added facts).
 
 *** How to Judge ***
-1. Confirm that all elements from the input are present in the output — no missing or altered data.
-2. Check that the reordering makes sense for sentence-level and paragraph-level generation.
-3. Look for unnecessary rigidity or repetition — the order should enhance narrative flow.
-4. Only flag outputs if they contain actual structural issues, such as illogical jumps, jarring transitions, or broken groupings.
-5. In rare cases, if the order is unchanged but still coherent and grouped well, that is acceptable.
+1. Check all triples are present, no more, no less.
+2. Assess if the ordering is reasonable for conversion into coherent sentences/paragraphs.
+3. Do not enforce a specific ordering unless required for clarity.
+4. Accept unchanged orders if still coherent.
 
 *** Output Format ***
-- If the ordering is acceptable and nothing is missing or hallucinated: respond with **CORRECT**
-- If there is a clear issue: respond with a **concise one-sentence explanation** of what is wrong.
-
-FEEDBACK:
-"""
-
-GUARDRAIL_PROMPT_TEXT_STRUCTURING = """You are a guardrail evaluating the output of the 'text structuring' agent in a structured data-to-text pipeline.
-
-*** Task ***
-Your job is to determine whether the agent has grouped the ordered facts into appropriate sentence-level and paragraph-level units using <snt> and <paragraph> tags.
-
-*** Evaluation Criteria ***
-- Each <snt> tag should wrap a **meaningful grouping of related facts** that could naturally appear in one sentence.
-- The <paragraph> tags (if used) should logically group related <snt> units.
-- The order of facts must match the original sequence from the 'content ordering' stage unless there's a justifiable structural reason.
-- No content should be **deleted, altered, or hallucinated**.
-- The output must **preserve the XML-like structure** — no broken or malformed tags.
-- **Do not penalize minor stylistic differences** in how facts are grouped; allow for variation in how different writers may express the same information.
-
-*** How to Judge ***
-1. Compare the output to the ordered input.
-2. Confirm that all facts are present and grouped in ways that support coherent sentence construction.
-3. Ensure that <snt> groupings reflect how humans would typically express multiple facts in a sentence.
-4. Check for well-formed <snt> and <paragraph> tags without breaking the input structure.
-5. Only flag the output if facts are clearly mismatched, missing, or structurally broken.
-
-*** Output Format ***
-- If the grouping is acceptable and no information is missing or malformed: respond with **CORRECT**
-- If there is a clear issue: respond with a **concise one-sentence explanation** of what is wrong.
+- If all triples are present, and the order is reasonable: respond with **CORRECT**
+- Otherwise: provide a short, clear explanation (e.g., “Omitted a triple”, “Order creates confusion”, “Fact hallucinated”).
 
 FEEDBACK:
 """
 
 
-GUARDRAIL_PROMPT_SURFACE_REALIZATION = """You are an guardrail evaluating the output of the 'surface realization' agent in a data-to-text pipeline.
+GUARDRAIL_PROMPT_TEXT_STRUCTURING = """
+You are a guardrail for the 'text structuring' phase in a WebNLG triple-based data-to-text pipeline.
 
 *** Task ***
-Determine whether the structured content has been accurately and fluently verbalized.
+Decide if the agent grouped the ordered triples into sensible sentence-level (<snt>) and paragraph-level (<paragraph>) units.
 
 *** Evaluation Criteria ***
-- All facts in the <snt> tags must be accurately reflected in the output text.
-- No additional content may be invented, and nothing may be omitted.
-- XML tags (e.g., <snt>, <cell>) should NOT appear in the output.
-- The output must read fluently and be grammatically correct.
-- Output must match the intended message of the structured content.
-- There should not be repetition of facts.
+- **No-Omissions**: Every triple from the input must be present in the output, grouped into some <snt> (sentence) and <paragraph> (paragraph).
+- **No-Additions**: No new or hallucinated facts or tags should be introduced.
+- **Accurate Grouping**: <snt> tags must group related facts for a sentence; <paragraph> tags group related sentences.
+- **Order Preservation**: The order should follow the content ordering phase, unless there’s a strong structural reason.
+- **Well-Formed Structure**: All tags must be valid and closed.
+- **Flexibility**: Allow for different—but reasonable—grouping styles.
+
+*** How to Judge ***
+- Confirm all triples are included and properly grouped.
+- Flag only for missing facts, hallucinated content, or broken grouping/structure.
 
 *** Output Format ***
-- If correct: respond with 'CORRECT'
-- If incorrect: provide a concise explanation of what is wrong
+- If the grouping is logical, complete, and no facts are omitted or added: respond with **CORRECT**
+- Otherwise: give a concise explanation of what is missing or incorrect.
+
+FEEDBACK:
+"""
+
+
+GUARDRAIL_PROMPT_SURFACE_REALIZATION = """
+You are a guardrail evaluating the 'surface realization' step in a WebNLG triple-to-text pipeline.
+
+*** Task ***
+Determine whether the structured facts from the <snt> tags are fully, accurately, and fluently expressed in the output text.
+
+*** Evaluation Criteria ***
+- **No-Omissions**: Every fact from the <snt> tags must appear in the generated text.
+- **No-Additions**: No content beyond the <snt> facts should be introduced.
+- **Fluency & Grammar**: Output must be fluent, grammatical, and free of awkward phrasing.
+- **No Repetition**: Each fact should be verbalized once; no unnecessary duplication.
+- **No Tags**: Output text must be free of <snt>, <paragraph>, or other structural tags.
+
+*** How to Judge ***
+- Match each sentence back to an <snt> block; ensure coverage and accuracy.
+- Flag only for omissions, hallucinations, repetitions, or fluency/grammar breakdowns.
+
+*** Output Format ***
+- If all criteria are met: respond with **CORRECT**
+- Otherwise: concise explanation.
 
 FEEDBACK:
 """
@@ -572,14 +575,13 @@ Final Answer: [One fluent, compact sentence that accurately reflects the structu
 FINALIZER_INPUT = """Generate a response to the provided objective as if you are responding to the original user.
 
 *** Input Context ***
-OBJECTIVE: {input}
 
 COMPLETED STEPS: {result_steps}
 
 *** Output Format ***
 Final Answer: 
 """
-
+# OBJECTIVE: {input}
 
 END_TO_END_GENERATION_PROMPT = """
 You are a data-to-text generation agent. Your task is to generate fluent, coherent, and factually accurate text from structured data.

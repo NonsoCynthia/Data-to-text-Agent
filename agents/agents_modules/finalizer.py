@@ -13,11 +13,12 @@ class TaskFinalizer:
     @classmethod
     def compile(cls, executor: AgentExecutor):
         def run(state: ExecutionState):
-            prompt = state.get('user_prompt', '') # User input
+            # prompt = state.get('user_prompt', '') # User input
             history = state.get("history_of_steps", [])
             step_log = "\n\n".join(summarize_agent_steps(history)[-2:]) or "No result steps." # Last 2 agent interactions formated
 
-            final_input = FINALIZER_INPUT.format(input=prompt, 
+            final_input = FINALIZER_INPUT.format(
+                                                #  input=prompt, 
                                                  result_steps=step_log
                                                  )
 
@@ -30,10 +31,10 @@ class TaskFinalizer:
             # print(f"\n\nFINALIZER OUTPUT: {reply}")
 
             history.append(AgentStepOutput(
-                agent_name="finalizer",
-                agent_input=prompt,
-                agent_output=reply
-            ))
+                                        agent_name="finalizer",
+                                        agent_input=final_input,
+                                        agent_output=reply
+                                    ))
 
             return {"final_response": reply, 
                     "history_of_steps": history
