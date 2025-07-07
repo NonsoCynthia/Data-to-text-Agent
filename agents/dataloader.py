@@ -82,7 +82,7 @@ def extract_example(dataset_name: str, example: Dict, index: int = None) -> Dict
         return {
             # Original triples list → linear string like GEM baseline
             "input": ", ".join(example.get("triples", [])),
-            # "target": example.get("references", [""])[0],
+            "target": example.get("references", [])[0],
             "references": example.get("references", []),
         }
 
@@ -110,6 +110,7 @@ def extract_example(dataset_name: str, example: Dict, index: int = None) -> Dict
     return {
         "input": example.get("input", ""),
         "target": example.get("target", ""),
+        "references": example.get("references", []),
     }
 
 
@@ -117,7 +118,7 @@ def extract_example(dataset_name: str, example: Dict, index: int = None) -> Dict
 # Quick sanity test (optional)
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    ds_name = "webnlg_grouped"
+    ds_name = "webnlg_hf"
     data = load_dataset_by_name(ds_name)
     sample = extract_example(ds_name, data["test"][0])
     print(sample)

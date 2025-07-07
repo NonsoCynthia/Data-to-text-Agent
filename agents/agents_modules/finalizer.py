@@ -15,7 +15,9 @@ class TaskFinalizer:
         def run(state: ExecutionState):
             # prompt = state.get('user_prompt', '') # User input
             history = state.get("history_of_steps", [])
-            step_log = "\n\n".join(summarize_agent_steps(history)[-2:]) or "No result steps." # Last 2 agent interactions formated
+            # step_log = "\n\n".join(summarize_agent_steps(history)[-2:]) or "No result steps." # Last 2 agent interactions formated
+            filtered_steps = [t for t in history if getattr(t, "agent_name", "").lower() not in ["orchestrator", "guardrail"]][-2:]
+            step_log = "\n\n".join(summarize_agent_steps(filtered_steps)) or "No result steps."
 
             final_input = FINALIZER_INPUT.format(
                                                 #  input=prompt, 
