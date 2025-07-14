@@ -69,7 +69,7 @@ def run():
     conf = model_name.get(args.model_provider.lower(), {})
     conf["temperature"] = 0.0
     
-    num_samples = 10 #len(dataset)
+    num_samples = len(dataset)
     print(f"Processing {num_samples} samples from '{args.name}' ({args.split})...")
 
     for i in tqdm(range(num_samples), desc=f"{args.type.upper()} Generation"):

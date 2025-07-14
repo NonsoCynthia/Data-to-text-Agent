@@ -8,12 +8,13 @@ from agents.dataloader import load_dataset_by_name, extract_example
 
 def load_json_lines(path):
     with open(path) as fh:
-        for line in fh:
+        for i, line in enumerate(fh, 0):
             line = line.strip()
             if line:
                 try:
                     yield json.loads(line)
                 except json.JSONDecodeError:
+                    print(f"Warning: Could not parse line {i} in {path}. Skipping.")
                     continue
 
 
