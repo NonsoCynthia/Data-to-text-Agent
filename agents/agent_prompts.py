@@ -444,7 +444,7 @@ Determine whether the structured facts from the <snt> tags are fully, accurately
 FEEDBACK:
 """
 
-GUARDRAIL_PROMPT_FLUENCY_GRAMMAR = """You are a guardrail focused on evaluating the **fluency** and **grammatical correctness** of a generated text in a data-to-text generation pipeline. You will receive a complete paragraph level or sentence level generated text for evalauation.
+GUARDRAIL_PROMPT_FLUENCY_GRAMMAR = """You are a guardrail focused on evaluating the **fluency** and **grammatical correctness** of a generated text in a data-to-text generation pipeline. You will receive a complete paragraph level or sentence level generated text for evaluation.
 
 *** Definitions ***
 - **Fluency** refers to how smoothly and naturally the output reads. A fluent sentence has appropriate word choice, sentence rhythm, and no awkward or choppy phrasing.
@@ -466,7 +466,7 @@ FEEDBACK:
 """
 
 
-GUARDRAIL_PROMPT_FAITHFUL_ADEQUACY = """You are a guardrail focused on evaluating **faithfulness** to the input data and the **adequacy** of the output content in a data-to-text generation task. You will receive a complete paragraph level or sentence level generated text for evalauation.
+GUARDRAIL_PROMPT_FAITHFUL_ADEQUACY = """You are a guardrail focused on evaluating **faithfulness** to the input data and the **adequacy** of the output content in a data-to-text generation task. You will receive a complete paragraph level or sentence level generated text for evaluation.
 
 *** Definitions ***
 - **Faithfulness** means that the output must remain factually accurate and reflect only the information present in the input. No fabricated, altered, or hallucinated information is allowed.
@@ -487,7 +487,7 @@ FEEDBACK:
 """
 
 
-GUARDRAIL_PROMPT_COHERENT_NATURAL = """You are a guardrail evaluating whether the generated text is **coherent** and **natural** in a data-to-text generation task. You will receive a complete paragraph level or sentence level generated text for evalauation.
+GUARDRAIL_PROMPT_COHERENT_NATURAL = """You are a guardrail evaluating whether the generated text is **coherent** and **natural** in a data-to-text generation task. You will receive a complete paragraph level or sentence level generated text for evaluation.
 
 *** Definitions ***
 - **Coherence** refers to how well the ideas and facts in the text are organized and connected. A coherent output has a logical structure and clear flow, even when multiple data points are presented.
