@@ -30,21 +30,20 @@
 // Again
 {"average_bleu": 0.6, "average_meteor": 0.778, "average_rouge_f1": 0.662, "average_comet": 0.853, "average_bertscore_f1": 0.961, "average_bleurt": 0.74}
 {"average_bleu": 0.579, "average_meteor": 0.765, "average_rouge_f1": 0.667, "average_comet": 0.846, "average_bertscore_f1": 0.96, "average_bleurt": 0.745}
-{"average_bleu": 0.579, "average_meteor": 0.769, "average_rouge_f1": 0.661, "average_comet": 0.85, "average_bertscore_f1": 0.96, "average_bleurt": 0.733}
-{"average_bleu": 0.604, "average_meteor": 0.755, "average_rouge_f1": 0.656, "average_comet": 0.855, "average_bertscore_f1": 0.963, "average_bleurt": 0.732}
-// Use the routing and add referring expression
-{"average_bleu": 0.628, "average_meteor": 0.799, "average_rouge_f1": 0.708, "average_comet": 0.857, "average_bertscore_f1": 0.962, "average_bleurt": 0.743}
-//Change orch to original
-{"average_bleu": 0.605, "average_meteor": 0.763, "average_rouge_f1": 0.668, "average_comet": 0.854, "average_bertscore_f1": 0.964, "average_bleurt": 0.747}
-//return to my own orch
-{"average_bleu": 0.603, "average_meteor": 0.768, "average_rouge_f1": 0.672, "average_comet": 0.855, "average_bertscore_f1": 0.963, "average_bleurt": 0.741}
-// return to SR
-{"average_bleu": 0.605, "average_meteor": 0.768, "average_rouge_f1": 0.67, "average_comet": 0.854, "average_bertscore_f1": 0.962, "average_bleurt": 0.739}
-//100 samples
-{"average_bleu": 0.516, "average_meteor": 0.671, "average_rouge_f1": 0.576, "average_comet": 0.83, "average_bertscore_f1": 0.954, "average_bleurt": 0.705}
-//10 sample adding the .format in orch
-{"average_bleu": 0.586, "average_meteor": 0.763, "average_rouge_f1": 0.654, "average_comet": 0.849, "average_bertscore_f1": 0.958, "average_bleurt": 0.74}
-//10 update SR with RG
-{"average_bleu": 0.608, "average_meteor": 0.779, "average_rouge_f1": 0.681, "average_comet": 0.856, "average_bertscore_f1": 0.962, "average_bleurt": 0.742}
-//100 samples
-{"average_bleu": 0.514, "average_meteor": 0.668, "average_rouge_f1": 0.58, "average_comet": 0.831, "average_bertscore_f1": 0.956, "average_bleurt": 0.71}
+// Monday 07 July
+{"average_bleu": 0.588, "average_meteor": 0.764, "average_rouge_f1": 0.681, "average_ter": 0.461, "average_chrf++": 0.769, "average_bleurt": 0.753, "average_bertscore_f1": 0.958, "average_comet": 0.845}
+// Change guardrail prompt. 10 Samples
+{"average_bleu": 0.64, "average_meteor": 0.781, "average_rouge_f1": 0.706, "average_ter": 0.366, "average_chrf++": 0.791, "average_bleurt": 0.75, "average_bertscore_f1": 0.966, "average_comet": 0.859}
+//100 sampples
+{"average_bleu": 0.526, "average_meteor": 0.668, "average_rouge_f1": 0.581, "average_ter": 0.51, "average_chrf++": 0.721, "average_bleurt": 0.711, "average_bertscore_f1": 0.957, "average_comet": 0.832}
+//modify finalizer -1
+{"average_bleu": 0.58, "average_meteor": 0.758, "average_rouge_f1": 0.657, "average_ter": 0.451, "average_chrf++": 0.762, "average_bleurt": 0.735, "average_bertscore_f1": 0.96, "average_comet": 0.848}
+{"average_bleu": 0.599, "average_meteor": 0.76, "average_rouge_f1": 0.667, "average_ter": 0.393, "average_chrf++": 0.774, "average_bleurt": 0.735, "average_bertscore_f1": 0.96, "average_comet": 0.849}
+// -2 with only workers feedback
+{"average_bleu": 0.62, "average_meteor": 0.81, "average_rouge_f1": 0.711, "average_ter": 0.406, "average_chrf++": 0.784, "average_bleurt": 0.754, "average_bertscore_f1": 0.963, "average_comet": 0.859}
+{"average_bleu": 0.61, "average_meteor": 0.745, "average_rouge_f1": 0.648, "average_ter": 0.419, "average_chrf++": 0.776, "average_bleurt": 0.729, "average_bertscore_f1": 0.962, "average_comet": 0.853}
+{"average_bleu": 0.638, "average_meteor": 0.821, "average_rouge_f1": 0.71, "average_ter": 0.384, "average_chrf++": 0.79, "average_bleurt": 0.741, "average_bertscore_f1": 0.963, "average_comet": 0.859}
+// 100 Samples
+{"average_bleu": 0.528, "average_meteor": 0.67, "average_rouge_f1": 0.583, "average_ter": 0.516, "average_chrf++": 0.719, "average_bleurt": 0.71, "average_bertscore_f1": 0.956, "average_comet": 0.832}
+//1779 samples
+{"average_bleu": 0.501, "average_meteor": 0.67, "average_rouge_f1": 0.591, "average_ter": 0.533, "average_chrf++": 0.715, "average_bleurt": 0.718, "average_bertscore_f1": 0.957, "average_comet": 0.831}
