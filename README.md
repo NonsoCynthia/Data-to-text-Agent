@@ -5,7 +5,7 @@ This repository contains the code and experiments for our research paper:
 
 We introduce the first **LLM-based multi-agent framework** for data-to-text generation, which combines the strengths of pipeline modularity with the fluency of end-to-end approaches. The system coordinates specialized worker agents (**Content Ordering, Text Structuring, Surface Realization**) under an **Orchestrator**, while **Guardrail agents** provide iterative feedback to ensure fluency, factual consistency, and completeness. A **Finalizer** component, depending on the quality of the text, may return a more refined or polished version of the final output.  
 
-Evaluation is carried out using both **automatic metrics** (BLEU, METEOR, ChrF, TER, BERTScore, COMET) and **human/LLM-as-judge assessments**.  
+Evaluation is carried out using both **automatic metrics** (BLEU, METEOR, ChrF, TER, BERTScore, COMET) and **Human and LLM-as-judge assessments**.  
 
 ---
 
