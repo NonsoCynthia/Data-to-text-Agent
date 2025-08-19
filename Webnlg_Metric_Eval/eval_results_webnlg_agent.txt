@@ -1,0 +1,68 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1755606066.184023  129913 cuda_dnn.cc:8579] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1755606066.186330  129913 cuda_blas.cc:1407] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+W0000 00:00:1755606066.192315  129913 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1755606066.192328  129913 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1755606066.192330  129913 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1755606066.192330  129913 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+STARTING TO PARSE INPUTS...
+FINISHING TO PARSE INPUTS...
+Traceback (most recent call last):
+  File "/home/chinonso/PHD_PROJECTS/Data-to-text-Agent/Webnlg Metric Eval/eval.py", line 395, in <module>
+    result = run(refs_path=refs_path, hyps_path=hyps_path, num_refs=num_refs, lng=lng, metrics=metrics, ncorder=ncorder, nworder=nworder, beta=beta)
+  File "/home/chinonso/PHD_PROJECTS/Data-to-text-Agent/Webnlg Metric Eval/eval.py", line 340, in run
+    bleu = bleu_score(refs_path, hyps_path, num_refs)
+NameError: name 'bleu_score' is not defined. Did you mean: 'bleurt_score'?
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1755606083.180275  130024 cuda_dnn.cc:8579] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1755606083.182406  130024 cuda_blas.cc:1407] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+W0000 00:00:1755606083.188417  130024 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1755606083.188429  130024 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1755606083.188430  130024 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1755606083.188431  130024 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+STARTING TO PARSE INPUTS...
+FINISHING TO PARSE INPUTS...
+Traceback (most recent call last):
+  File "/home/chinonso/PHD_PROJECTS/Data-to-text-Agent/Webnlg Metric Eval/eval.py", line 395, in <module>
+    result = run(refs_path=refs_path, hyps_path=hyps_path, num_refs=num_refs, lng=lng, metrics=metrics, ncorder=ncorder, nworder=nworder, beta=beta)
+  File "/home/chinonso/PHD_PROJECTS/Data-to-text-Agent/Webnlg Metric Eval/eval.py", line 340, in run
+    bleu = bleu_score(refs_path, hyps_path, num_refs)
+NameError: name 'bleu_score' is not defined. Did you mean: 'bleurt_score'?
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1755606194.427320  130152 cuda_dnn.cc:8579] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1755606194.429460  130152 cuda_blas.cc:1407] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+W0000 00:00:1755606194.435442  130152 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1755606194.435454  130152 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1755606194.435463  130152 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+W0000 00:00:1755606194.435464  130152 computation_placer.cc:177] computation placer already registered. Please check linkage and avoid linking the same target more than once.
+Some weights of RobertaModel were not initialized from the model checkpoint at roberta-large and are newly initialized: ['pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+INFO:tensorflow:Reading checkpoint metrics/bleurt/bleurt-base-128.
+INFO:tensorflow:Config file found, reading.
+INFO:tensorflow:Will load checkpoint bert_custom
+INFO:tensorflow:Loads full paths and checks that files exists.
+INFO:tensorflow:... name:bert_custom
+INFO:tensorflow:... vocab_file:vocab.txt
+INFO:tensorflow:... bert_config_file:bert_config.json
+INFO:tensorflow:... do_lower_case:True
+INFO:tensorflow:... max_seq_length:128
+INFO:tensorflow:Creating BLEURT scorer.
+INFO:tensorflow:Creating WordPiece tokenizer.
+INFO:tensorflow:WordPiece tokenizer instantiated.
+INFO:tensorflow:Creating Eager Mode predictor.
+INFO:tensorflow:Loading model.
+INFO:tensorflow:BLEURT initialized.
+STARTING TO PARSE INPUTS...
+FINISHING TO PARSE INPUTS...
+STARTING TO COMPUTE BLEU...
+FINISHING TO COMPUTE BLEU...
+STARTING TO COMPUTE METEOR...
+FINISHING TO COMPUTE METEOR...
+STARTING TO COMPUTE CHRF++...
+FINISHING TO COMPUTE CHRF++...
+STARTING TO COMPUTE TER...
+FINISHING TO COMPUTE TER...
+STARTING TO COMPUTE BERT SCORE...
+  BLEU    BLEU NLTK    METEOR    chrF++    TER    BERT-SCORE P    BERT-SCORE R    BERT-SCORE F1    BLEURT
+------  -----------  --------  --------  -----  --------------  --------------  ---------------  --------
+ 48.42         0.48      0.42      0.69   0.46            0.95            0.96             0.96      0.58

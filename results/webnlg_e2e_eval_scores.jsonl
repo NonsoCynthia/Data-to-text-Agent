@@ -1,8 +1,4 @@
-{"average_bleu": 0.347, "average_meteor": 0.592, "average_rouge_f1": 0.511, "average_comet": 0.802, "average_bertscore_f1": 0.941, "average_bleurt": 0.656}
-{"average_bleu": 0.552, "average_meteor": 0.769, "average_rouge_f1": 0.658, "average_comet": 0.845, "average_bertscore_f1": 0.956, "average_bleurt": 0.744}
-{"average_bleu": 0.54, "average_meteor": 0.754, "average_rouge_f1": 0.623, "average_comet": 0.847, "average_bertscore_f1": 0.961, "average_bleurt": 0.702}
-// First 100 samples
-{"average_bleu": 0.607, "average_meteor": 0.776, "average_rouge_f1": 0.672, "average_comet": 0.855, "average_bertscore_f1": 0.964, "average_bleurt": 0.746}
 // Final Score 1779 Samples
-{"average_bleu": 0.512, "average_meteor": 0.668, "average_rouge_f1": 0.595, "average_comet": 0.833, "average_bertscore_f1": 0.958, "average_bleurt": 0.722}
-{"average_bleu": 0.512, "average_meteor": 0.668, "average_rouge_f1": 0.595, "average_ter": 0.507, "average_chrf++": 0.715, "average_bleurt": 0.722, "average_bertscore_f1": 0.958, "average_comet": 0.833}
+{
+    "average_comet": 0.833
+}
