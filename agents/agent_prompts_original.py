@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    Prompt drafts
+"""
+
 # https://smith.langchain.com/hub/hwchase17/react
 # https://smith.langchain.com/hub/hwchase17/react-json agent_human_prompt
 # https://smith.langchain.com/hub

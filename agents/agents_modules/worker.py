@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    Worker agent that executes tasks based on the orchestrator's instructions
+"""
+
 from typing import Dict, List, Text, Any, Union, Optional
 from langchain.agents import AgentExecutor, create_json_chat_agent
 from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate

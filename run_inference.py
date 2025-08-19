@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    This script runs inference using a specified LLM provider and dataset.
+""" 
+
 import os
 import json
 import argparse

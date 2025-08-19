@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    LLM model interface for various providers (Ollama, OpenAI, Anthropic, Groq, aiXplain, HuggingFace).
+"""
+
 import os, getpass
 from dotenv import load_dotenv, find_dotenv
 from typing import Dict, Optional, Text, Union

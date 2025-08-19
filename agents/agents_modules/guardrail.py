@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    Provide guardrail evaluation for worker outputs
+"""
+
 import re
 from langchain.agents import AgentExecutor
 from agents.utilities.utils import ExecutionState, AgentStepOutput

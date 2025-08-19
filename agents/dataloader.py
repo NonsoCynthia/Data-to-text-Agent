@@ -1,9 +1,16 @@
-# --- agents/dataloader.py ---
-"""Dataset loader extended to use the *grouped* WebNLG reference file.
+__author__='chinonsocynthiaosuji'
 
-It adds a new dataset key `webnlg_grouped` that reads the JSON produced by your
-`fa_test_grouped.json` utility.  `extract_example()` is amended to expose the
-full `references` list so the evaluator can exploit every variant.
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    This loads datasets for the Data-to-text-Agent project. 
+
+    The Dataset loader extended to use the *grouped* WebNLG reference file.
+
+    It adds a new dataset key `webnlg_grouped` that reads the JSON produced by your
+    `fa_test_grouped.json` utility.  `extract_example()` is amended to expose the
+    full `references` list so the evaluator can exploit every variant.
 """
 
 from pathlib import Path

@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    Refine, polish and return the final output
+"""
+
 from langchain.agents import AgentExecutor
 from agents.utilities.utils import ExecutionState, AgentStepOutput
 from agents.llm_model import UnifiedModel, model_name

@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    This script evaluates predictions against a dataset using various metrics.
+""" 
+
 import json
 import argparse
 from statistics import mean

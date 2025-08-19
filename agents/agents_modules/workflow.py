@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    Define the workflow for the data-to-text agent system
+"""
+
 from typing import List, Dict, Union, Any, Literal
 from langgraph.graph import START, END, StateGraph
 from agents.utilities.utils import ExecutionState

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Activate Conda environment
-# For macOS (commented out):
+# For macOS:
 # source /Users/chinonsoosuji/opt/anaconda3/etc/profile.d/conda.sh
 
 # For Ubuntu/Linux:

@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+  This module contains the prompts used by the agents in the data-to-text generation pipeline.
+"""
+
 ORCHESTRATOR_PROMPT = """You are the orchestrator agent responsible for supervising a structured data-to-text generation pipeline. Your primary role is to ensure the pipeline produces fluent, coherent, and contextually accurate textual outputs that fully align with user expectations. The pipeline comprises three sequential and strictly ordered stages:
 
 1. Content Ordering (CO): Organizes the data logically to form a coherent narrative structure.

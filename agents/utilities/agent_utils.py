@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    Utility functions for agent workflows, including variable substitution and step summarization in a uniquely formatted template.
+"""
+
 import os
 import re
 import json

@@ -1,3 +1,13 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    Orchestrate the task execution by directing agents to perform specific tasks
+"""
+
+
 import re
 from typing import Dict, List, Text, Any, Union, Optional
 from langchain.agents import AgentExecutor

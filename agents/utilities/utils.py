@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    This module defines utility classes and types used in the agent's execution pipeline.
+"""
+
 import re
 from enum import Enum
 from uuid import uuid4

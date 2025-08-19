@@ -1,3 +1,12 @@
+__author__='chinonsocynthiaosuji'
+
+"""
+Author: Chinonso Cynthia Osuji
+Date: 10/07/2025
+Description:
+    Evaluate the generated text using various metrics.
+""" 
+
 import nltk
 import torch
 from nltk.tokenize import word_tokenize
