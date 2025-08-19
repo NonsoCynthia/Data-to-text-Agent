@@ -1,11 +1,11 @@
 # Are Multi-Agents the New Pipeline Architecture for Data-to-Text Systems?
 
 This repository contains the code and experiments for our research paper:  
-**“Are Multi-Agents the new Pipeline Architecture for Data-to-Text Systems?”**  
+**“Are Multi-Agents the New Pipeline Architecture for Data-to-Text Systems?”**  
 
-Our work introduces the first **LLM-based multi-agent framework** for data-to-text generation, combining the strengths of pipeline modularity and end-to-end fluency. The architecture coordinates specialized worker agents (**Content Ordering, Text Structuring, Surface Realization**) under an **Orchestrator**, while **Guardrail agents** provide iterative feedback to ensure fluency, factual consistency, and completeness. The **Finalizer** depending on the quality of the text, may return a more refined or polished final text. 
+We introduce the first **LLM-based multi-agent framework** for data-to-text generation, which combines the strengths of pipeline modularity with the fluency of end-to-end approaches. The system coordinates specialized worker agents (**Content Ordering, Text Structuring, Surface Realization**) under an **Orchestrator**, while **Guardrail agents** provide iterative feedback to ensure fluency, factual consistency, and completeness. A **Finalizer** component, depending on the quality of the text, may return a more refined or polished version of the final output.  
 
-Evaluation is carried out using Automatic evaluation (BLEU, METEOR, ChrF, TER, BERTScore, COMET) and Human/LLM-as-judge evaluations.  
+Evaluation is carried out using both **automatic metrics** (BLEU, METEOR, ChrF, TER, BERTScore, COMET) and **human/LLM-as-judge assessments**.  
 
 ---
 
@@ -33,7 +33,7 @@ Evaluation is carried out using Automatic evaluation (BLEU, METEOR, ChrF, TER, B
 ## Setup
 
 ### Environment
-- Python 3.8 (Ideal for Comet evaluation) or higher  
+- Python 3.8 (ideal for running comet metric evaluation) or higher  
 - Required packages (see `requirements.txt`)  
 
 ---
