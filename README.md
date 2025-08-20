@@ -51,6 +51,7 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+Create a .env file in the project root (or your home directory) and add your API keys
 ---
 
 ## Usage
