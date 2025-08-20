@@ -1,7 +1,6 @@
 # Are Multi-Agents the New Pipeline Architecture for Data-to-Text Systems?
 
-This repository contains the code and experiments for our research paper:  
-**“Are Multi-Agents the New Pipeline Architecture for Data-to-Text Systems?”**  
+This repository contains the code and experiments for our research paper:  **“Are Multi-Agents the New Pipeline Architecture for Data-to-Text Systems?”**  
 
 We introduce the first **LLM-based multi-agent framework** for data-to-text generation, which combines the strengths of pipeline modularity with the fluency of end-to-end approaches. The system coordinates specialized worker agents (**Content Ordering, Text Structuring, Surface Realization**) under an **Orchestrator**, while **Guardrail agents** provide iterative feedback to ensure fluency, factual consistency, and completeness. A **Finalizer** component, depending on the quality of the text, may return a more refined or polished version of the final output.  
 
