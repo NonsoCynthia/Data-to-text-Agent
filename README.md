@@ -68,6 +68,20 @@ Run the script:
 
 By default, results will be saved in the `results/` folder.  
 
+<!-- ---
+
+## 📜 Citation  
+
+If you use this code or results, please cite:  
+
+```bibtex
+@inproceedings{osujietal2025agents,
+  title     = {Are Multi-Agents the New Pipeline Architecture for Data-to-Text Systems?},
+  author    = {Osuji, Chinonso Cynthia and others},
+  booktitle = {Proceedings of the 18th International Natural Language Generation Conference},
+  year      = {2025}
+}
+``` -->
 ---
 
 ## License
