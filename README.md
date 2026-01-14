@@ -72,7 +72,7 @@ By default, results will be saved in the `results/` folder.
 
 ---
 
-## 📜 Citation  
+## Citation  
 
 If you use this code or results, please cite:  
 
