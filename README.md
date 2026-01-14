@@ -70,20 +70,33 @@ Run the script:
 
 By default, results will be saved in the `results/` folder.  
 
-<!-- ---
+---
 
 ## 📜 Citation  
 
 If you use this code or results, please cite:  
 
 ```bibtex
-@inproceedings{osujietal2025agents,
-  title     = {Are Multi-Agents the New Pipeline Architecture for Data-to-Text Systems?},
-  author    = {Osuji, Chinonso Cynthia and others},
-  booktitle = {Proceedings of the 18th International Natural Language Generation Conference},
-  year      = {2025}
+@inproceedings{osuji-etal-2025-multi,
+    title = "Are Multi-Agents the new Pipeline Architecture for Data-to-Text Systems?",
+    author = "Osuji, Chinonso Cynthia  and
+      Timoney, Brian  and
+      Andrade, Mark  and
+      Castro Ferreira, Thiago  and
+      Davis, Brian",
+    editor = "Flek, Lucie  and
+      Narayan, Shashi  and
+      Phương, L{\^e} Hồng  and
+      Pei, Jiahuan",
+    booktitle = "Proceedings of the 18th International Natural Language Generation Conference",
+    month = oct,
+    year = "2025",
+    address = "Hanoi, Vietnam",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2025.inlg-main.33/",
+    pages = "542--553",
 }
-``` -->
+```
 ---
 
 ## License
