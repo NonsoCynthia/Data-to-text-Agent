@@ -2,7 +2,7 @@
 
 
 <p align="center">
-  <img src="image.png" alt="System architecture" title="System Architecture" width="700">
+  <img src="image.png" alt="System architecture" title="System Architecture" width="350">
   <br>
   <em>System Architecture</em>
 </p>
