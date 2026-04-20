@@ -1,6 +1,6 @@
 # Are Multi-Agents the New Pipeline Architecture for Data-to-Text Systems?
 
-![System architecture](image.png)
+    ![System architecture](image.png)
 
 This repository contains the code and experiments for our research paper:  **“Are Multi-Agents the New Pipeline Architecture for Data-to-Text Systems?”**
 
